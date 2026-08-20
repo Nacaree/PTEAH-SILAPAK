@@ -14,22 +14,60 @@ export function getScores(answers, questionList = questions) {
   return scores;
 }
 
-export function getWinner(answers, questionList = questions) {
-  const scores = getScores(answers, questionList);
-  const highest = Math.max(...Object.values(scores));
-  const tied = characterIds.filter((id) => scores[id] === highest);
-
-  if (tied.length === 1) return { winnerId: tied[0], scores };
+function getTiePriority(answers, tiedIds, questionList) {
+  const priority = [];
 
   for (let index = Math.min(13, questionList.length - 1); index >= 0; index -= 1) {
     const question = questionList[index];
     const selected = question.options.find((option) => option.id === answers[question.id]);
-    if (selected && tied.includes(selected.characterId)) {
-      return { winnerId: selected.characterId, scores };
+    if (
+      selected &&
+      tiedIds.includes(selected.characterId) &&
+      !priority.includes(selected.characterId)
+    ) {
+      priority.push(selected.characterId);
     }
   }
 
-  return { winnerId: tied[0], scores };
+  tiedIds.forEach((id) => {
+    if (!priority.includes(id)) priority.push(id);
+  });
+
+  return priority;
+}
+
+export function getRankedResults(answers, questionList = questions) {
+  const scores = getScores(answers, questionList);
+  const total = Object.values(scores).reduce((sum, score) => sum + score, 0);
+  const groupedByScore = new Map();
+
+  characterIds.forEach((id) => {
+    const score = scores[id];
+    const group = groupedByScore.get(score) || [];
+    group.push(id);
+    groupedByScore.set(score, group);
+  });
+
+  const orderedIds = [...groupedByScore.keys()]
+    .sort((a, b) => b - a)
+    .flatMap((score) => getTiePriority(answers, groupedByScore.get(score), questionList));
+
+  return orderedIds.map((characterId, index) => ({
+    characterId,
+    rank: index + 1,
+    score: scores[characterId],
+    percentage: total ? Math.round((scores[characterId] / total) * 1000) / 10 : 0,
+  }));
+}
+
+export function getWinner(answers, questionList = questions) {
+  const ranking = getRankedResults(answers, questionList);
+  return {
+    winnerId: ranking[0].characterId,
+    runnerUpId: ranking[1].characterId,
+    scores: Object.fromEntries(ranking.map((result) => [result.characterId, result.score])),
+    ranking,
+  };
 }
 
 export function isQuizComplete(answers, questionList = questions) {

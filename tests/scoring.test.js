@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { characterIds, questions } from "../app/data/quizData";
-import { getScores, getWinner, isQuizComplete } from "../app/lib/scoring";
+import { getRankedResults, getScores, getWinner, isQuizComplete } from "../app/lib/scoring";
 
 function answerFor(characterId, question) {
   return question.options.find((option) => option.characterId === characterId).id;
@@ -43,5 +43,26 @@ describe("character scoring", () => {
 
     expect(getScores(answers)).toEqual({ vitou: 3, anita: 3, tohla: 3, kimly: 3, mc: 3 });
     expect(getWinner(answers).winnerId).toBe("kimly");
+    expect(getRankedResults(answers).map((result) => result.characterId)).toEqual([
+      "kimly",
+      "tohla",
+      "anita",
+      "vitou",
+      "mc",
+    ]);
+  });
+
+  it("returns one-decimal percentages and an always-available runner-up", () => {
+    const answers = Object.fromEntries(
+      questions.map((question, index) => [
+        question.id,
+        answerFor(index < 6 ? "vitou" : index < 11 ? "anita" : "tohla", question),
+      ]),
+    );
+    const ranking = getRankedResults(answers);
+
+    expect(ranking[0]).toMatchObject({ characterId: "vitou", rank: 1, score: 6, percentage: 40 });
+    expect(ranking[1]).toMatchObject({ characterId: "anita", rank: 2, score: 5, percentage: 33.3 });
+    expect(ranking).toHaveLength(5);
   });
 });

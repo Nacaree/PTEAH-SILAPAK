@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { copy, languages } from "./data/content";
-import { characters, characterIds, questions, sections } from "./data/quizData";
-import { getScores, getWinner, isQuizComplete } from "./lib/scoring";
+import { characters, questions, sections } from "./data/quizData";
+import { getRankedResults, getWinner, isQuizComplete } from "./lib/scoring";
 import { getShareUrl } from "./lib/sharing";
 
 const STORAGE_KEY = "pteah-silapak-quiz-v1";
@@ -369,8 +369,10 @@ function QuestionScreen({ question, index, section, answer, onAnswer, onNext, on
   );
 }
 
-function ResultScreen({ winner, scores, onRetake, onHome, onShare, copied, shared }) {
-  const total = scores ? Object.values(scores).reduce((sum, score) => sum + score, 0) : 0;
+function ResultScreen({ winner, ranking, onRetake, onHome, onShare, copied, shared }) {
+  const topMatch = ranking?.[0];
+  const secondMatch = ranking?.[1];
+  const runnerUp = secondMatch ? characters[secondMatch.characterId] : null;
 
   return (
     <Shell theme={{ ...baseTheme, color: winner.color }} patterned scroll>
@@ -379,6 +381,14 @@ function ResultScreen({ winner, scores, onRetake, onHome, onShare, copied, share
         <p className="text-[10px] font-black uppercase tracking-[0.25em] opacity-55">Your closest match is</p>
         <h1 className="mt-2 text-5xl font-black tracking-tight" style={{ color: winner.color }}>{winner.name}</h1>
         <p className="mt-1 text-sm font-black uppercase tracking-[0.12em] opacity-55">{winner.archetype}</p>
+        {topMatch && (
+          <div
+            className="mt-4 rounded-full px-5 py-2 text-lg font-black text-white shadow-sm"
+            style={{ backgroundColor: winner.color }}
+          >
+            {topMatch.percentage.toFixed(1)}% match
+          </div>
+        )}
 
         <div className="my-7">
           <div
@@ -404,6 +414,26 @@ function ResultScreen({ winner, scores, onRetake, onHome, onShare, copied, share
           ))}
         </div>
 
+        {runnerUp && (
+          <div className="mt-8 flex w-full items-center gap-4 rounded-2xl border-2 border-black/8 bg-white p-4 text-left shadow-sm">
+            <div
+              className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-2xl font-black text-white"
+              style={{ backgroundColor: runnerUp.color }}
+              aria-hidden="true"
+            >
+              {runnerUp.mark}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-black/40">Your second match</p>
+              <p className="mt-1 text-lg font-black" style={{ color: runnerUp.color }}>{runnerUp.name}</p>
+              <p className="text-xs font-bold text-black/45">{runnerUp.archetype}</p>
+            </div>
+            <span className="text-lg font-black" style={{ color: runnerUp.color }}>
+              {secondMatch.percentage.toFixed(1)}%
+            </span>
+          </div>
+        )}
+
         <div className="mt-8 grid w-full gap-3 text-left">
           <div className="rounded-2xl bg-white p-5 shadow-sm">
             <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>A tender spot</p>
@@ -415,20 +445,21 @@ function ResultScreen({ winner, scores, onRetake, onHome, onShare, copied, share
           </div>
         </div>
 
-        {scores && !shared && (
+        {ranking && !shared && (
           <div className="mt-8 w-full rounded-2xl bg-white p-5 text-left shadow-sm">
-            <h2 className="text-sm font-black uppercase tracking-[0.14em]">Your house mix</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.14em]">Your full match breakdown</h2>
             <div className="mt-4 grid gap-3">
-              {characterIds.map((id) => (
-                <div key={id} className="grid grid-cols-[62px_1fr_25px] items-center gap-2 text-xs font-bold">
-                  <span>{characters[id].name}</span>
+              {ranking.map((match) => (
+                <div key={match.characterId} className="grid grid-cols-[18px_62px_1fr_48px] items-center gap-2 text-xs font-bold">
+                  <span className="text-black/35">{match.rank}</span>
+                  <span>{characters[match.characterId].name}</span>
                   <div className="h-2 overflow-hidden rounded-full bg-black/8">
                     <div
                       className="h-full rounded-full"
-                      style={{ width: `${total ? (scores[id] / total) * 100 : 0}%`, backgroundColor: characters[id].color }}
+                      style={{ width: `${match.percentage}%`, backgroundColor: characters[match.characterId].color }}
                     />
                   </div>
-                  <span className="text-right text-black/45">{scores[id]}</span>
+                  <span className="text-right text-black/45">{match.percentage.toFixed(1)}%</span>
                 </div>
               ))}
             </div>
@@ -469,8 +500,8 @@ export default function Home() {
   const currentQuestion = questions[currentIndex];
   const currentSection = getSection(currentIndex);
   const complete = isQuizComplete(answers);
-  const result = useMemo(() => getWinner(answers), [answers]);
-  const resultId = sharedResultId || result.winnerId;
+  const ranking = useMemo(() => getRankedResults(answers), [answers]);
+  const resultId = sharedResultId || ranking[0].characterId;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -627,7 +658,7 @@ export default function Home() {
     return (
       <ResultScreen
         winner={characters[resultId]}
-        scores={sharedResultId ? null : getScores(answers)}
+        ranking={sharedResultId ? null : ranking}
         onRetake={() => resetQuiz("cover")}
         onHome={goHome}
         onShare={shareResult}

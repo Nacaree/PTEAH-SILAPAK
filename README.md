@@ -1,7 +1,7 @@
 # Pteah Silapak Character Quiz
 
-A frontend-only React personality quiz with 15 questions, five themed sections,
-and five possible character matches.
+A frontend-only bilingual (English/Khmer) React personality quiz with 15 questions,
+five themed sections, and five possible character matches.
 
 ## Local development
 

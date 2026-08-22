@@ -4,13 +4,20 @@ import { characters, questions, sections } from "./data/quizData";
 import { getRankedResults, getWinner, isQuizComplete } from "./lib/scoring";
 import { getShareUrl } from "./lib/sharing";
 
-const STORAGE_KEY = "pteah-silapak-quiz-v1";
+const STORAGE_KEY = "pteah-silapak-quiz-v2";
 const baseTheme = {
   color: "#668e3f",
   soft: "#f4f6eb",
   accent: "#aed125",
   ink: "#173d22",
 };
+
+function localize(value, language) {
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value[language] || value.en || "";
+  }
+  return value;
+}
 
 function BrandMark({ compact = false }) {
   return (
@@ -80,11 +87,12 @@ function ProgressDots({ active, total = 3 }) {
   );
 }
 
-function Shell({ children, theme = baseTheme, patterned = false, scroll = false }) {
+function Shell({ children, theme = baseTheme, patterned = false, scroll = false, language = "en" }) {
   return (
     <main className="min-h-[100dvh] bg-[#706b6d] sm:grid sm:place-items-center sm:p-6">
       <div
-        className={`relative mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-[var(--soft)] text-[var(--ink)] shadow-2xl sm:min-h-[820px] sm:rounded-[2rem] ${scroll ? "max-h-[100dvh] overflow-y-auto sm:max-h-[calc(100dvh-3rem)]" : "sm:h-[820px]"}`}
+        lang={language === "km" ? "km" : "en"}
+        className={`relative mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-[var(--soft)] text-[var(--ink)] shadow-2xl sm:min-h-[820px] sm:rounded-[2rem] ${language === "km" ? "font-khmer" : ""} ${scroll ? "max-h-[100dvh] overflow-y-auto sm:max-h-[calc(100dvh-3rem)]" : "sm:h-[820px]"}`}
         style={{
           "--theme": theme.color,
           "--soft": theme.soft,
@@ -99,32 +107,32 @@ function Shell({ children, theme = baseTheme, patterned = false, scroll = false 
   );
 }
 
-function TopBrand({ onHome, theme = baseTheme }) {
+function TopBrand({ onHome, theme = baseTheme, text }) {
   return (
     <div className="flex h-14 shrink-0 items-center justify-between rounded-b-[1.6rem] bg-[var(--theme)] px-5 text-white shadow-sm">
       <button
         type="button"
         onClick={onHome}
         className="rounded-full p-1.5 transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-        aria-label="Return home"
+        aria-label={text.home}
       >
         <BrandMark compact />
       </button>
       <span className="rounded-full border border-white/30 px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em]">
-        {theme.number ? `Section ${theme.number}` : "The quiz"}
+        {theme.number ? `${text.section} ${theme.number}` : text.quiz}
       </span>
     </div>
   );
 }
 
-function BottomNav({ onHome }) {
+function BottomNav({ onHome, text }) {
   return (
     <div className="mt-auto flex h-12 shrink-0 items-center justify-center bg-[#668e3f] text-white">
       <button
         type="button"
         onClick={onHome}
         className="grid h-9 w-12 place-items-center rounded-full text-xl transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white"
-        aria-label="Return to landing page"
+        aria-label={text.home}
       >
         ⌂
       </button>
@@ -149,28 +157,27 @@ function PrimaryButton({ children, onClick, disabled = false, light = false }) {
   );
 }
 
-function Landing({ onLanguage, notice, hasProgress, onResume, onReset }) {
+function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, language }) {
   return (
-    <Shell>
+    <Shell language={language}>
       <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 text-[#668e3f]">
         <BrandMark />
         <p className="mt-6 max-w-56 text-center text-sm font-semibold text-black/50">
-          A house for art, questions, and the people we are becoming.
+          {text.landingTagline}
         </p>
 
         <div className="mt-14 flex rounded-full border border-[#668e3f]/30 bg-white p-1 shadow-sm">
-          {Object.entries(languages).map(([id, language]) => (
+          {Object.entries(languages).map(([id, languageOption]) => (
             <button
               key={id}
               type="button"
               onClick={() => onLanguage(id)}
-              aria-disabled={!language.available}
+              aria-pressed={language === id}
               className={`min-w-20 rounded-full px-5 py-2.5 text-xs font-black tracking-[0.12em] transition focus-visible:outline-2 focus-visible:outline-[#668e3f] ${
-                language.available ? "bg-[#668e3f] text-white hover:bg-[#567c34]" : "text-[#668e3f] hover:bg-[#eef4e7]"
+                language === id ? "bg-[#668e3f] text-white" : "text-[#668e3f] hover:bg-[#eef4e7]"
               }`}
             >
-              {language.label}
-              {!language.available && <span className="ml-1 text-[8px] opacity-65">SOON</span>}
+              {languageOption.label}
             </button>
           ))}
         </div>
@@ -181,9 +188,9 @@ function Landing({ onLanguage, notice, hasProgress, onResume, onReset }) {
 
         {hasProgress && (
           <div className="mt-7 flex w-full max-w-xs flex-col gap-3 border-t border-[#668e3f]/20 pt-7">
-            <PrimaryButton onClick={onResume}>Continue where you left off</PrimaryButton>
+            <PrimaryButton onClick={onResume}>{text.resume}</PrimaryButton>
             <button type="button" onClick={onReset} className="text-xs font-bold text-black/45 underline underline-offset-4">
-              Start fresh
+              {text.startAgain}
             </button>
           </div>
         )}
@@ -193,15 +200,15 @@ function Landing({ onLanguage, notice, hasProgress, onResume, onReset }) {
   );
 }
 
-function Cover({ text, onEnter, onBack }) {
+function Cover({ text, language, onEnter, onBack }) {
   return (
-    <Shell theme={baseTheme} patterned>
-      <TopBrand onHome={onBack} />
+    <Shell theme={baseTheme} patterned language={language}>
+      <TopBrand onHome={onBack} text={text} />
       <div className="relative flex flex-1 flex-col items-center px-8 pb-7 pt-9 text-center">
         <div className="absolute left-5 top-32 rotate-[-12deg] text-5xl opacity-70" aria-hidden="true">▤</div>
         <div className="absolute bottom-24 right-5 rotate-12 text-5xl opacity-70" aria-hidden="true">▰</div>
-        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#668e3f]/60">An invitation</p>
-        <h1 className="mt-3 text-4xl font-black leading-[0.95] tracking-tight text-[#668e3f]">{text.title}</h1>
+        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#668e3f]/60">{text.invitation}</p>
+        <h1 className={`${language === "km" ? "text-3xl leading-[1.35]" : "text-4xl leading-[0.95]"} mt-3 font-black tracking-tight text-[#668e3f]`}>{text.title}</h1>
         <p className="mt-3 text-xs font-bold text-black/45">{text.subtitle}</p>
         <div className="my-auto py-7">
           <ArtworkPlaceholder kind="key" color="#668e3f" label="key artwork" large />
@@ -213,13 +220,13 @@ function Cover({ text, onEnter, onBack }) {
   );
 }
 
-function Story({ text, onNext, onBack, onHome }) {
+function Story({ text, language, onNext, onBack, onHome }) {
   return (
-    <Shell theme={baseTheme} patterned>
-      <TopBrand onHome={onHome} />
+    <Shell theme={baseTheme} patterned language={language}>
+      <TopBrand onHome={onHome} text={text} />
       <div className="flex flex-1 flex-col px-7 pb-6 pt-8">
         <div className="text-5xl text-[#668e3f]" aria-hidden="true">⚿</div>
-        <h1 className="mt-3 text-4xl font-black tracking-tight text-[#668e3f]">{text.introduction}</h1>
+        <h1 className={`${language === "km" ? "text-3xl leading-relaxed" : "text-4xl"} mt-3 font-black tracking-tight text-[#668e3f]`}>{text.introduction}</h1>
         <div className="mt-4 rounded-2xl bg-[#668e3f] p-5 text-sm font-semibold leading-relaxed text-white shadow-lg">
           <p>{text.story}</p>
           <p className="mt-3 text-xs text-white/75">{text.storyNote}</p>
@@ -241,12 +248,12 @@ function Story({ text, onNext, onBack, onHome }) {
   );
 }
 
-function Instructions({ text, onBegin, onBack, onHome }) {
+function Instructions({ text, language, onBegin, onBack, onHome }) {
   return (
-    <Shell theme={baseTheme} patterned>
-      <TopBrand onHome={onHome} />
+    <Shell theme={baseTheme} patterned language={language}>
+      <TopBrand onHome={onHome} text={text} />
       <div className="flex flex-1 flex-col justify-center px-6 py-8">
-        <p className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.22em] text-[#668e3f]/60">Before you enter</p>
+        <p className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.22em] text-[#668e3f]/60">{text.beforeYouEnter}</p>
         <div className="overflow-hidden rounded-[2rem] border-2 border-[#195a2a] bg-white shadow-[0_18px_44px_rgba(24,63,35,0.14)]">
           {text.instructions.map((instruction, index) => (
             <div
@@ -281,39 +288,39 @@ function Instructions({ text, onBegin, onBack, onHome }) {
   );
 }
 
-function SectionIntro({ section, onContinue, onBack, onHome }) {
+function SectionIntro({ section, text, language, onContinue, onBack, onHome }) {
   return (
-    <Shell theme={section} patterned>
-      <TopBrand onHome={onHome} theme={section} />
+    <Shell theme={section} patterned language={language}>
+      <TopBrand onHome={onHome} theme={section} text={text} />
       <div className="relative flex flex-1 flex-col items-center justify-center px-8 py-9 text-center">
-        <p className="text-xs font-black uppercase tracking-[0.24em] opacity-60">Section {section.number}</p>
+        <p className="text-xs font-black uppercase tracking-[0.24em] opacity-60">{text.section} {section.number}</p>
         <div className="my-8">
           <ArtworkPlaceholder kind={section.art} color={section.color} label="temporary character" />
         </div>
-        <h1 className="max-w-xs text-4xl font-black uppercase leading-[0.92] tracking-tight">{section.title}</h1>
-        <p className="mt-4 max-w-64 text-sm font-semibold opacity-65">{section.subtitle}</p>
+        <h1 className={`${language === "km" ? "text-3xl leading-[1.45]" : "text-4xl uppercase leading-[0.92]"} max-w-xs font-black tracking-tight`}>{localize(section.title, language)}</h1>
+        <p className={`${language === "km" ? "leading-7" : ""} mt-4 max-w-72 text-sm font-semibold opacity-65`}>{localize(section.subtitle, language)}</p>
         <div className="mt-10 flex w-full max-w-xs items-center justify-between gap-3">
           <button type="button" onClick={onBack} className="px-3 py-2 text-xs font-black underline decoration-current/30 underline-offset-4">
-            Back
+            {text.back}
           </button>
-          <PrimaryButton onClick={onContinue}>Enter section →</PrimaryButton>
+          <PrimaryButton onClick={onContinue}>{text.enterSection} →</PrimaryButton>
         </div>
       </div>
-      <BottomNav onHome={onHome} />
+      <BottomNav onHome={onHome} text={text} />
     </Shell>
   );
 }
 
-function QuestionScreen({ question, index, section, answer, onAnswer, onNext, onBack, onHome }) {
+function QuestionScreen({ question, index, section, answer, text, language, onAnswer, onNext, onBack, onHome }) {
   const sectionPosition = index - section.start + 1;
   const sectionTotal = section.end - section.start + 1;
 
   return (
-    <Shell theme={section} patterned>
-      <TopBrand onHome={onHome} theme={section} />
+    <Shell theme={section} patterned language={language}>
+      <TopBrand onHome={onHome} theme={section} text={text} />
       <div className="flex min-h-0 flex-1 flex-col px-5 pb-4 pt-5">
         <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] opacity-60">
-          <span>{sectionPosition}/{sectionTotal} in section</span>
+          <span>{sectionPosition}/{sectionTotal} {text.inSection}</span>
           <span>{index + 1}/15</span>
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-black/10" aria-hidden="true">
@@ -321,8 +328,8 @@ function QuestionScreen({ question, index, section, answer, onAnswer, onNext, on
         </div>
 
         <fieldset className="mt-5 min-h-0 flex-1">
-          <legend className="mx-auto block max-w-[350px] px-2 text-center text-[1.45rem] font-black leading-[1.04] tracking-tight">
-            {question.prompt}
+          <legend className={`${language === "km" ? "text-[1.15rem] leading-[1.65]" : "text-[1.45rem] leading-[1.04]"} mx-auto block max-w-[370px] px-2 text-center font-black tracking-tight`}>
+            {localize(question.prompt, language)}
           </legend>
           <div className="mt-5 grid gap-2.5">
             {question.options.map((option, optionIndex) => {
@@ -347,8 +354,8 @@ function QuestionScreen({ question, index, section, answer, onAnswer, onNext, on
                   <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-black ${selected ? "bg-white text-[var(--theme)]" : "bg-[var(--soft)] text-[var(--theme)]"}`}>
                     {String.fromCharCode(65 + optionIndex)}
                   </span>
-                  <span className="pt-0.5">{option.text}</span>
-                  {selected && <span className="ml-auto pt-0.5 text-xs" aria-label="Selected">✓</span>}
+                  <span className={`${language === "km" ? "leading-6" : ""} pt-0.5`}>{localize(option.text, language)}</span>
+                  {selected && <span className="ml-auto pt-0.5 text-xs" aria-label={text.selected}>✓</span>}
                 </label>
               );
             })}
@@ -357,36 +364,36 @@ function QuestionScreen({ question, index, section, answer, onAnswer, onNext, on
 
         <div className="mt-4 flex items-center justify-between gap-3">
           <button type="button" onClick={onBack} className="min-h-11 rounded-full px-4 text-xs font-black underline decoration-current/30 underline-offset-4">
-            ← Back
+            ← {text.back}
           </button>
           <PrimaryButton onClick={onNext} disabled={!answer}>
-            {index === questions.length - 1 ? "Meet my match" : "Next →"}
+            {index === questions.length - 1 ? text.meetMatch : `${text.next} →`}
           </PrimaryButton>
         </div>
       </div>
-      <BottomNav onHome={onHome} />
+      <BottomNav onHome={onHome} text={text} />
     </Shell>
   );
 }
 
-function ResultScreen({ winner, ranking, onRetake, onHome, onShare, copied, shared }) {
+function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onShare, copied, shared }) {
   const topMatch = ranking?.[0];
   const secondMatch = ranking?.[1];
   const runnerUp = secondMatch ? characters[secondMatch.characterId] : null;
 
   return (
-    <Shell theme={{ ...baseTheme, color: winner.color }} patterned scroll>
-      <TopBrand onHome={onHome} theme={{ ...baseTheme, color: winner.color }} />
+    <Shell theme={{ ...baseTheme, color: winner.color }} patterned scroll language={language}>
+      <TopBrand onHome={onHome} theme={{ ...baseTheme, color: winner.color }} text={text} />
       <div className="flex flex-col items-center px-6 pb-10 pt-8 text-center">
-        <p className="text-[10px] font-black uppercase tracking-[0.25em] opacity-55">Your closest match is</p>
-        <h1 className="mt-2 text-5xl font-black tracking-tight" style={{ color: winner.color }}>{winner.name}</h1>
-        <p className="mt-1 text-sm font-black uppercase tracking-[0.12em] opacity-55">{winner.archetype}</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.25em] opacity-55">{text.resultEyebrow}</p>
+        <h1 className={`${language === "km" ? "text-4xl leading-relaxed" : "text-5xl"} mt-2 font-black tracking-tight`} style={{ color: winner.color }}>{localize(winner.name, language)}</h1>
+        <p className={`${language === "km" ? "leading-7" : "uppercase tracking-[0.12em]"} mt-1 text-sm font-black opacity-55`}>{localize(winner.archetype, language)}</p>
         {topMatch && (
           <div
             className="mt-4 rounded-full px-5 py-2 text-lg font-black text-white shadow-sm"
             style={{ backgroundColor: winner.color }}
           >
-            {topMatch.percentage.toFixed(1)}% match
+            {topMatch.percentage.toFixed(1)}% {text.match}
           </div>
         )}
 
@@ -394,7 +401,7 @@ function ResultScreen({ winner, ranking, onRetake, onHome, onShare, copied, shar
           <div
             className="relative grid h-44 w-44 place-items-center overflow-hidden rounded-[2.8rem] border-4 bg-white shadow-[0_18px_45px_rgba(20,31,23,0.16)]"
             style={{ borderColor: winner.color, color: winner.color }}
-            aria-label={`${winner.name} temporary portrait`}
+            aria-label={`${localize(winner.name, language)} portrait`}
           >
             <span className="absolute -right-7 -top-7 h-24 w-24 rounded-full bg-current opacity-15" />
             <span className="absolute -bottom-10 -left-5 h-32 w-32 rotate-12 rounded-[2.5rem] bg-current opacity-10" />
@@ -403,16 +410,7 @@ function ResultScreen({ winner, ranking, onRetake, onHome, onShare, copied, shar
           </div>
         </div>
 
-        <p className="max-w-sm text-xl font-black leading-tight">{winner.summary}</p>
-        <p className="mt-4 max-w-sm text-sm font-medium leading-relaxed text-black/60">{winner.description}</p>
-
-        <div className="mt-7 flex flex-wrap justify-center gap-2">
-          {winner.strengths.map((strength) => (
-            <span key={strength} className="rounded-full px-4 py-2 text-xs font-black text-white" style={{ backgroundColor: winner.color }}>
-              {strength}
-            </span>
-          ))}
-        </div>
+        <p className={`${language === "km" ? "leading-9" : "leading-tight"} max-w-sm text-xl font-black`}>{localize(winner.summary, language)}</p>
 
         {runnerUp && (
           <div className="mt-8 flex w-full items-center gap-4 rounded-2xl border-2 border-black/8 bg-white p-4 text-left shadow-sm">
@@ -424,9 +422,9 @@ function ResultScreen({ winner, ranking, onRetake, onHome, onShare, copied, shar
               {runnerUp.mark}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-black/40">Your second match</p>
-              <p className="mt-1 text-lg font-black" style={{ color: runnerUp.color }}>{runnerUp.name}</p>
-              <p className="text-xs font-bold text-black/45">{runnerUp.archetype}</p>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-black/40">{text.secondMatch}</p>
+              <p className="mt-1 text-lg font-black" style={{ color: runnerUp.color }}>{localize(runnerUp.name, language)}</p>
+              <p className={`${language === "km" ? "leading-5" : ""} text-xs font-bold text-black/45`}>{localize(runnerUp.archetype, language)}</p>
             </div>
             <span className="text-lg font-black" style={{ color: runnerUp.color }}>
               {secondMatch.percentage.toFixed(1)}%
@@ -434,25 +432,34 @@ function ResultScreen({ winner, ranking, onRetake, onHome, onShare, copied, shar
           </div>
         )}
 
-        <div className="mt-8 grid w-full gap-3 text-left">
+        <h2 className="mt-8 w-full text-left text-sm font-black uppercase tracking-[0.14em]">{text.moreInfo}</h2>
+        <div className="mt-3 grid w-full gap-3 text-left">
           <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>A tender spot</p>
-            <p className="mt-2 text-sm font-semibold leading-relaxed text-black/65">{winner.vulnerability}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>{text.strength}</p>
+            <p className="mt-2 text-sm font-semibold leading-relaxed text-black/65">{localize(winner.strength, language)}</p>
           </div>
           <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>How you connect</p>
-            <p className="mt-2 text-sm font-semibold leading-relaxed text-black/65">{winner.connection}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>{text.challenge}</p>
+            <p className="mt-2 text-sm font-semibold leading-relaxed text-black/65">{localize(winner.challenge, language)}</p>
+          </div>
+          <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>{text.hiddenFear}</p>
+            <p className="mt-2 text-sm font-semibold leading-relaxed text-black/65">{localize(winner.hiddenFear, language)}</p>
+          </div>
+          <div className="rounded-2xl bg-white p-5 shadow-sm">
+            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>{text.traits}</p>
+            <p className="mt-2 text-sm font-semibold leading-relaxed text-black/65">{localize(winner.traits, language)}</p>
           </div>
         </div>
 
         {ranking && !shared && (
           <div className="mt-8 w-full rounded-2xl bg-white p-5 text-left shadow-sm">
-            <h2 className="text-sm font-black uppercase tracking-[0.14em]">Your full match breakdown</h2>
+            <h2 className="text-sm font-black uppercase tracking-[0.14em]">{text.fullBreakdown}</h2>
             <div className="mt-4 grid gap-3">
               {ranking.map((match) => (
                 <div key={match.characterId} className="grid grid-cols-[18px_62px_1fr_48px] items-center gap-2 text-xs font-bold">
                   <span className="text-black/35">{match.rank}</span>
-                  <span>{characters[match.characterId].name}</span>
+                  <span>{localize(characters[match.characterId].name, language)}</span>
                   <div className="h-2 overflow-hidden rounded-full bg-black/8">
                     <div
                       className="h-full rounded-full"
@@ -467,16 +474,16 @@ function ResultScreen({ winner, ranking, onRetake, onHome, onShare, copied, shar
         )}
 
         {shared && (
-          <p className="mt-7 rounded-full bg-white px-5 py-2 text-xs font-bold text-black/50 shadow-sm">A friend shared this character with you.</p>
+          <p className="mt-7 rounded-full bg-white px-5 py-2 text-xs font-bold text-black/50 shadow-sm">{text.sharedResult}</p>
         )}
 
         <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
-          <PrimaryButton onClick={onShare}>{copied ? "Link copied ✓" : "Copy result link"}</PrimaryButton>
+          <PrimaryButton onClick={onShare}>{copied ? text.copied : text.share}</PrimaryButton>
           <button type="button" onClick={onRetake} className="min-h-12 rounded-full border-2 border-black/15 bg-white px-5 text-sm font-black transition hover:border-black/30">
-            Take the quiz
+            {text.retake}
           </button>
         </div>
-        <button type="button" onClick={onHome} className="mt-5 text-xs font-black text-black/45 underline underline-offset-4">Back home</button>
+        <button type="button" onClick={onHome} className="mt-5 text-xs font-black text-black/45 underline underline-offset-4">{text.backHome}</button>
       </div>
     </Shell>
   );
@@ -516,7 +523,7 @@ export default function Home() {
     try {
       const saved = JSON.parse(window.localStorage.getItem(STORAGE_KEY));
       if (saved) {
-        setLanguage(saved.language === "km" ? "en" : saved.language || "en");
+        setLanguage(languages[saved.language]?.available ? saved.language : "en");
         setAnswers(saved.answers || {});
         setCurrentIndex(Number.isInteger(saved.currentIndex) ? saved.currentIndex : 0);
         setScreen(saved.screen || "landing");
@@ -526,6 +533,10 @@ export default function Home() {
     }
     setHydrated(true);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = language === "km" ? "km" : "en";
+  }, [language]);
 
   useEffect(() => {
     if (!hydrated || sharedResultId) return;
@@ -622,13 +633,13 @@ export default function Home() {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2200);
     } catch {
-      window.prompt("Copy this result link:", url);
+      window.prompt(text.copyPrompt, url);
     }
   }
 
   if (!hydrated) {
     return (
-      <Shell>
+      <Shell language={language}>
         <div className="grid flex-1 place-items-center text-[#668e3f]">
           <div className="animate-pulse"><BrandMark /></div>
         </div>
@@ -636,16 +647,18 @@ export default function Home() {
     );
   }
 
-  if (screen === "cover") return <Cover text={text} onEnter={() => setScreen("story")} onBack={goHome} />;
-  if (screen === "story") return <Story text={text} onNext={() => setScreen("instructions")} onBack={() => setScreen("cover")} onHome={goHome} />;
-  if (screen === "instructions") return <Instructions text={text} onBegin={beginQuiz} onBack={() => setScreen("story")} onHome={goHome} />;
-  if (screen === "section") return <SectionIntro section={currentSection} onContinue={() => setScreen("question")} onBack={backFromSection} onHome={goHome} />;
+  if (screen === "cover") return <Cover text={text} language={language} onEnter={() => setScreen("story")} onBack={goHome} />;
+  if (screen === "story") return <Story text={text} language={language} onNext={() => setScreen("instructions")} onBack={() => setScreen("cover")} onHome={goHome} />;
+  if (screen === "instructions") return <Instructions text={text} language={language} onBegin={beginQuiz} onBack={() => setScreen("story")} onHome={goHome} />;
+  if (screen === "section") return <SectionIntro section={currentSection} text={text} language={language} onContinue={() => setScreen("question")} onBack={backFromSection} onHome={goHome} />;
   if (screen === "question") {
     return (
       <QuestionScreen
         question={currentQuestion}
         index={currentIndex}
         section={currentSection}
+        text={text}
+        language={language}
         answer={answers[currentQuestion.id]}
         onAnswer={chooseAnswer}
         onNext={nextQuestion}
@@ -659,6 +672,8 @@ export default function Home() {
       <ResultScreen
         winner={characters[resultId]}
         ranking={sharedResultId ? null : ranking}
+        text={text}
+        language={language}
         onRetake={() => resetQuiz("cover")}
         onHome={goHome}
         onShare={shareResult}
@@ -675,6 +690,8 @@ export default function Home() {
       hasProgress={Object.keys(answers).length > 0}
       onResume={resumeQuiz}
       onReset={() => resetQuiz("cover")}
+      text={text}
+      language={language}
     />
   );
 }

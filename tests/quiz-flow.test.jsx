@@ -12,7 +12,7 @@ describe("quiz flow", () => {
     render(<Home />);
 
     fireEvent.click(await screen.findByRole("button", { name: "ENG" }));
-    expect(await screen.findByText("Who will live here?")).toBeInTheDocument();
+    expect(await screen.findByText("Find your creative room")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Enter" }));
     expect(await screen.findByText("Introduction")).toBeInTheDocument();
@@ -26,7 +26,7 @@ describe("quiz flow", () => {
 
   it("restores saved quiz progress from local storage", async () => {
     window.localStorage.setItem(
-      "pteah-silapak-quiz-v1",
+      "pteah-silapak-quiz-v2",
       JSON.stringify({
         language: "en",
         screen: "question",
@@ -38,8 +38,22 @@ describe("quiz flow", () => {
     render(<Home />);
 
     await waitFor(() => {
-      expect(screen.getByText("What word would people close to you use to describe you?")).toBeInTheDocument();
+      expect(screen.getByText("What word fits you best?")).toBeInTheDocument();
     });
-    expect(screen.getByRole("radio", { name: "Curious" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: /Reliable/ })).toBeChecked();
+  });
+
+  it("offers the complete Khmer onboarding and first question", async () => {
+    render(<Home />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "KH" }));
+    expect(await screen.findByText("ស្វែងរកបន្ទប់ច្នៃប្រឌិតរបស់អ្នក")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "ចូល" }));
+    expect(await screen.findByText("សេចក្តីផ្តើម")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /បន្ទាប់/ }));
+    fireEvent.click(screen.getByRole("button", { name: /ចាប់ផ្តើម/ }));
+    expect(await screen.findByText("អត្តសញ្ញាណ និងការមើលឃើញខ្លួនឯង")).toBeInTheDocument();
   });
 });

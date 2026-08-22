@@ -23,6 +23,10 @@ body {
   text-rendering: optimizeLegibility;
 }
 
+.font-khmer {
+  font-family: "Noto Sans Khmer", "Khmer OS Battambang", "Khmer Sangam MN", Arial, sans-serif;
+}
+
 button,
 label,
 input {

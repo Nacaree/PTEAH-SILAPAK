@@ -27,4 +27,22 @@ describe("quiz data", () => {
     expect(new Set(questionIds).size).toBe(questionIds.length);
     expect(new Set(answerIds).size).toBe(answerIds.length);
   });
+
+  it("includes complete English and Khmer content for every section and question", () => {
+    sections.forEach((section) => {
+      expect(section.title.en).toBeTruthy();
+      expect(section.title.km).toBeTruthy();
+      expect(section.subtitle.en).toBeTruthy();
+      expect(section.subtitle.km).toBeTruthy();
+    });
+
+    questions.forEach((question) => {
+      expect(question.prompt.en).toBeTruthy();
+      expect(question.prompt.km).toBeTruthy();
+      question.options.forEach((option) => {
+        expect(option.text.en).toBeTruthy();
+        expect(option.text.km).toBeTruthy();
+      });
+    });
+  });
 });

@@ -1,9 +1,14 @@
 @import "tailwindcss";
 
+@theme {
+  --color-white: #fafafa;
+  --color-black: #2b2b2b;
+}
+
 :root {
   color-scheme: light;
-  --background: #f4f6eb;
-  --foreground: #173d22;
+  --background: #fafafa;
+  --foreground: #2b2b2b;
 }
 
 * {
@@ -11,7 +16,7 @@
 }
 
 html {
-  background: #706b6d;
+  background: #2b2b2b;
 }
 
 body {
@@ -41,14 +46,33 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.brand-logo {
+  display: block;
+  width: 16rem;
+  height: 14rem;
+  object-fit: cover;
+  object-position: center;
+}
+
+.brand-wordmark {
+  display: block;
+  width: 7.5rem;
+  height: 2rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: white;
+}
+
 .motif-band {
-  background-color: var(--pattern-color);
-  background-image:
-    radial-gradient(circle at 25% 25%, var(--pattern-accent) 0 13%, transparent 14%),
-    radial-gradient(circle at 75% 75%, var(--pattern-accent) 0 13%, transparent 14%),
-    linear-gradient(45deg, transparent 42%, color-mix(in srgb, var(--pattern-accent) 80%, white) 43% 57%, transparent 58%);
-  background-position: 0 0, 0 0, 0 0;
-  background-size: 26px 26px;
+  background-color: var(--pattern-accent);
+}
+
+.motif-art {
+  width: 34rem;
+  height: 24rem;
+  object-fit: cover;
+  object-position: center;
+  mix-blend-mode: multiply;
 }
 
 @media (prefers-reduced-motion: reduce) {

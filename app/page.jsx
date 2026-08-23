@@ -6,11 +6,17 @@ import { getShareUrl } from "./lib/sharing";
 
 const STORAGE_KEY = "pteah-silapak-quiz-v2";
 const baseTheme = {
-  color: "#668e3f",
-  soft: "#f4f6eb",
-  accent: "#aed125",
-  ink: "#173d22",
+  color: "#66883e",
+  soft: "#fafafa",
+  accent: "#b5d627",
+  ink: "#2b2b2b",
 };
+
+const darkTextThemes = new Set(["#b5d627", "#ff582e", "#feb2bf"]);
+
+function getThemeContrast(theme) {
+  return theme.contrast || (darkTextThemes.has(theme.color.toLowerCase()) ? "#2b2b2b" : "#fafafa");
+}
 
 function localize(value, language) {
   if (value && typeof value === "object" && !Array.isArray(value)) {
@@ -20,19 +26,28 @@ function localize(value, language) {
 }
 
 function BrandMark({ compact = false }) {
+  if (compact) {
+    return (
+      <span className="brand-wordmark" aria-label="Pteah Silapak">
+        <img
+          src="/assets/pteah-silapak-wordmark.png"
+          alt=""
+          className="h-full w-full object-cover object-center"
+        />
+      </span>
+    );
+  }
+
   return (
-    <div className={`flex flex-col items-center ${compact ? "gap-0" : "gap-2"}`} aria-label="Pteah Silapak">
-      <div
-        className={`${compact ? "h-7 w-7 text-base" : "h-24 w-24 text-5xl"} grid place-items-center rounded-[28%] border-[3px] border-current font-black`}
-      >
-        ⌂
-      </div>
-      <div className={`${compact ? "text-[8px]" : "text-xs"} font-black tracking-[0.18em]`}>PTEAH SILAPAK</div>
-    </div>
+    <img
+      src="/assets/pteah-silapak-logo.png"
+      alt="Pteah Silapak"
+      className="brand-logo"
+    />
   );
 }
 
-function ArtworkPlaceholder({ kind, color = "#668e3f", label, large = false }) {
+function ArtworkPlaceholder({ kind, color = "#66883e", label, large = false }) {
   const symbols = {
     key: "⚿",
     group: "● ● ●\n ● ●",
@@ -46,7 +61,7 @@ function ArtworkPlaceholder({ kind, color = "#668e3f", label, large = false }) {
 
   return (
     <div
-      className={`relative grid shrink-0 place-items-center overflow-hidden rounded-[2rem] border-2 border-black/10 bg-white/75 shadow-[0_12px_34px_rgba(19,41,24,0.12)] ${large ? "h-56 w-48" : "h-36 w-36"}`}
+      className={`relative grid shrink-0 place-items-center overflow-hidden rounded-[2rem] border-2 border-black/10 bg-white/75 shadow-[0_12px_34px_rgba(26,76,25,0.12)] ${large ? "h-56 w-48" : "h-36 w-36"}`}
       style={{ color }}
       aria-label={`${label || kind} placeholder artwork`}
     >
@@ -67,10 +82,16 @@ function ArtworkPlaceholder({ kind, color = "#668e3f", label, large = false }) {
 function PatternBand({ color, accent }) {
   return (
     <div
-      className="motif-band h-12 w-full shrink-0"
+      className="motif-band relative h-12 w-full shrink-0 overflow-hidden"
       style={{ "--pattern-color": color, "--pattern-accent": accent }}
       aria-hidden="true"
-    />
+    >
+      <img
+        src="/assets/pteah-silapak-pattern.png"
+        alt=""
+        className="motif-art pointer-events-none absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
+      />
+    </div>
   );
 }
 
@@ -89,7 +110,7 @@ function ProgressDots({ active, total = 3 }) {
 
 function Shell({ children, theme = baseTheme, patterned = false, scroll = false, language = "en" }) {
   return (
-    <main className="min-h-[100dvh] bg-[#706b6d] sm:grid sm:place-items-center sm:p-6">
+    <main className="min-h-[100dvh] bg-[#2b2b2b] sm:grid sm:place-items-center sm:p-6">
       <div
         lang={language === "km" ? "km" : "en"}
         className={`relative mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-[var(--soft)] text-[var(--ink)] shadow-2xl sm:min-h-[820px] sm:rounded-[2rem] ${language === "km" ? "font-khmer" : ""} ${scroll ? "max-h-[100dvh] overflow-y-auto sm:max-h-[calc(100dvh-3rem)]" : "sm:h-[820px]"}`}
@@ -97,7 +118,8 @@ function Shell({ children, theme = baseTheme, patterned = false, scroll = false,
           "--theme": theme.color,
           "--soft": theme.soft,
           "--accent": theme.accent,
-          "--ink": theme.ink || "#173d22",
+          "--ink": theme.ink || "#2b2b2b",
+          "--contrast": getThemeContrast(theme),
         }}
       >
         {patterned && <PatternBand color={theme.color} accent={theme.accent} />}
@@ -109,16 +131,16 @@ function Shell({ children, theme = baseTheme, patterned = false, scroll = false,
 
 function TopBrand({ onHome, theme = baseTheme, text }) {
   return (
-    <div className="flex h-14 shrink-0 items-center justify-between rounded-b-[1.6rem] bg-[var(--theme)] px-5 text-white shadow-sm">
+    <div className="flex h-14 shrink-0 items-center justify-between rounded-b-[1.6rem] bg-[var(--theme)] px-5 text-[var(--contrast)] shadow-sm">
       <button
         type="button"
         onClick={onHome}
-        className="rounded-full p-1.5 transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        className="rounded-full p-1.5 transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--contrast)]"
         aria-label={text.home}
       >
         <BrandMark compact />
       </button>
-      <span className="rounded-full border border-white/30 px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em]">
+      <span className="rounded-full border border-current/30 px-3 py-1 text-[9px] font-black uppercase tracking-[0.2em]">
         {theme.number ? `${text.section} ${theme.number}` : text.quiz}
       </span>
     </div>
@@ -127,7 +149,7 @@ function TopBrand({ onHome, theme = baseTheme, text }) {
 
 function BottomNav({ onHome, text }) {
   return (
-    <div className="mt-auto flex h-12 shrink-0 items-center justify-center bg-[#668e3f] text-white">
+    <div className="mt-auto flex h-12 shrink-0 items-center justify-center bg-[#66883e] text-white">
       <button
         type="button"
         onClick={onHome}
@@ -149,7 +171,7 @@ function PrimaryButton({ children, onClick, disabled = false, light = false }) {
       className={`min-h-12 rounded-full px-7 py-3 text-sm font-black tracking-wide transition focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-35 ${
         light
           ? "bg-white text-[var(--theme)] hover:bg-white/90 focus-visible:outline-white"
-          : "bg-[var(--theme)] text-white shadow-[0_8px_20px_rgba(24,63,35,0.18)] hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-[var(--theme)]"
+          : "bg-[var(--theme)] text-[var(--contrast)] shadow-[0_8px_20px_rgba(26,76,25,0.18)] hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-[var(--theme)]"
       }`}
     >
       {children}
@@ -160,21 +182,21 @@ function PrimaryButton({ children, onClick, disabled = false, light = false }) {
 function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, language }) {
   return (
     <Shell language={language}>
-      <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 text-[#668e3f]">
+      <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 text-[#66883e]">
         <BrandMark />
-        <p className="mt-6 max-w-56 text-center text-sm font-semibold text-black/50">
+        <p className="mt-4 max-w-56 text-center text-sm font-semibold text-black/50">
           {text.landingTagline}
         </p>
 
-        <div className="mt-14 flex rounded-full border border-[#668e3f]/30 bg-white p-1 shadow-sm">
+        <div className="mt-10 flex rounded-full border border-[#66883e]/30 bg-white p-1 shadow-sm">
           {Object.entries(languages).map(([id, languageOption]) => (
             <button
               key={id}
               type="button"
               onClick={() => onLanguage(id)}
               aria-pressed={language === id}
-              className={`min-w-20 rounded-full px-5 py-2.5 text-xs font-black tracking-[0.12em] transition focus-visible:outline-2 focus-visible:outline-[#668e3f] ${
-                language === id ? "bg-[#668e3f] text-white" : "text-[#668e3f] hover:bg-[#eef4e7]"
+              className={`min-w-20 rounded-full px-5 py-2.5 text-xs font-black tracking-[0.12em] transition focus-visible:outline-2 focus-visible:outline-[#66883e] ${
+                language === id ? "bg-[#66883e] text-white" : "text-[#66883e] hover:bg-[#b5d627]/20"
               }`}
             >
               {languageOption.label}
@@ -182,12 +204,12 @@ function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, lan
           ))}
         </div>
 
-        <p className="mt-4 min-h-5 text-center text-xs font-bold text-[#d9471b]" role="status" aria-live="polite">
+        <p className="mt-4 min-h-5 text-center text-xs font-bold text-[#c8320d]" role="status" aria-live="polite">
           {notice}
         </p>
 
         {hasProgress && (
-          <div className="mt-7 flex w-full max-w-xs flex-col gap-3 border-t border-[#668e3f]/20 pt-7">
+          <div className="mt-7 flex w-full max-w-xs flex-col gap-3 border-t border-[#66883e]/20 pt-7">
             <PrimaryButton onClick={onResume}>{text.resume}</PrimaryButton>
             <button type="button" onClick={onReset} className="text-xs font-bold text-black/45 underline underline-offset-4">
               {text.startAgain}
@@ -195,7 +217,7 @@ function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, lan
           </div>
         )}
       </div>
-      <div className="h-2 bg-[#aed125]" />
+      <div className="h-2 bg-[#b5d627]" />
     </Shell>
   );
 }
@@ -207,14 +229,14 @@ function Cover({ text, language, onEnter, onBack }) {
       <div className="relative flex flex-1 flex-col items-center px-8 pb-7 pt-9 text-center">
         <div className="absolute left-5 top-32 rotate-[-12deg] text-5xl opacity-70" aria-hidden="true">▤</div>
         <div className="absolute bottom-24 right-5 rotate-12 text-5xl opacity-70" aria-hidden="true">▰</div>
-        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#668e3f]/60">{text.invitation}</p>
-        <h1 className={`${language === "km" ? "text-3xl leading-[1.35]" : "text-4xl leading-[0.95]"} mt-3 font-black tracking-tight text-[#668e3f]`}>{text.title}</h1>
+        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#66883e]/60">{text.invitation}</p>
+        <h1 className={`${language === "km" ? "text-3xl leading-[1.35]" : "text-4xl leading-[0.95]"} mt-3 font-black tracking-tight text-[#66883e]`}>{text.title}</h1>
         <p className="mt-3 text-xs font-bold text-black/45">{text.subtitle}</p>
         <div className="my-auto py-7">
-          <ArtworkPlaceholder kind="key" color="#668e3f" label="key artwork" large />
+          <ArtworkPlaceholder kind="key" color="#66883e" label="key artwork" large />
         </div>
         <PrimaryButton onClick={onEnter}>{text.enter}</PrimaryButton>
-        <div className="mt-8 text-[#668e3f]"><ProgressDots active={0} /></div>
+        <div className="mt-8 text-[#66883e]"><ProgressDots active={0} /></div>
       </div>
     </Shell>
   );
@@ -225,21 +247,21 @@ function Story({ text, language, onNext, onBack, onHome }) {
     <Shell theme={baseTheme} patterned language={language}>
       <TopBrand onHome={onHome} text={text} />
       <div className="flex flex-1 flex-col px-7 pb-6 pt-8">
-        <div className="text-5xl text-[#668e3f]" aria-hidden="true">⚿</div>
-        <h1 className={`${language === "km" ? "text-3xl leading-relaxed" : "text-4xl"} mt-3 font-black tracking-tight text-[#668e3f]`}>{text.introduction}</h1>
-        <div className="mt-4 rounded-2xl bg-[#668e3f] p-5 text-sm font-semibold leading-relaxed text-white shadow-lg">
+        <div className="text-5xl text-[#66883e]" aria-hidden="true">⚿</div>
+        <h1 className={`${language === "km" ? "text-3xl leading-relaxed" : "text-4xl"} mt-3 font-black tracking-tight text-[#66883e]`}>{text.introduction}</h1>
+        <div className="mt-4 rounded-2xl bg-[#66883e] p-5 text-sm font-semibold leading-relaxed text-white shadow-lg">
           <p>{text.story}</p>
           <p className="mt-3 text-xs text-white/75">{text.storyNote}</p>
         </div>
         <div className="my-auto flex justify-center py-7">
-          <ArtworkPlaceholder kind="group" color="#668e3f" label="five housemates" large />
+          <ArtworkPlaceholder kind="group" color="#66883e" label="five housemates" large />
         </div>
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
           <button type="button" onClick={onBack} className="justify-self-start text-xs font-black text-black/45 underline underline-offset-4">
             {text.back}
           </button>
-          <div className="text-[#668e3f]"><ProgressDots active={1} /></div>
-          <button type="button" onClick={onNext} className="justify-self-end rounded-full bg-[#668e3f] px-5 py-2 text-xs font-black text-white">
+          <div className="text-[#66883e]"><ProgressDots active={1} /></div>
+          <button type="button" onClick={onNext} className="justify-self-end rounded-full bg-[#66883e] px-5 py-2 text-xs font-black text-white">
             {text.next} →
           </button>
         </div>
@@ -253,26 +275,26 @@ function Instructions({ text, language, onBegin, onBack, onHome }) {
     <Shell theme={baseTheme} patterned language={language}>
       <TopBrand onHome={onHome} text={text} />
       <div className="flex flex-1 flex-col justify-center px-6 py-8">
-        <p className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.22em] text-[#668e3f]/60">{text.beforeYouEnter}</p>
-        <div className="overflow-hidden rounded-[2rem] border-2 border-[#195a2a] bg-white shadow-[0_18px_44px_rgba(24,63,35,0.14)]">
+        <p className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.22em] text-[#66883e]/60">{text.beforeYouEnter}</p>
+        <div className="overflow-hidden rounded-[2rem] border-2 border-[#1a4c19] bg-white shadow-[0_18px_44px_rgba(26,76,25,0.14)]">
           {text.instructions.map((instruction, index) => (
             <div
               key={instruction}
               className={`grid min-h-24 place-items-center px-6 text-center font-black uppercase tracking-wide ${
-                index === 1 ? "bg-[#195a2a] text-white" : index === 2 ? "bg-[#0f4f20] text-white" : "text-[#195a2a]"
-              } ${index > 0 ? "border-t-2 border-[#195a2a]" : ""}`}
+                index === 1 ? "bg-[#1a4c19] text-white" : index === 2 ? "bg-[#1a4c19] text-white" : "text-[#1a4c19]"
+              } ${index > 0 ? "border-t-2 border-[#1a4c19]" : ""}`}
             >
               <span className={index === 0 ? "max-w-56 text-sm" : "text-lg"}>{instruction}</span>
             </div>
           ))}
-          <div className="bg-[#0f4f20] px-7 pb-8 pt-4">
+          <div className="bg-[#1a4c19] px-7 pb-8 pt-4">
             <button
               type="button"
               onClick={onBegin}
-              className="group flex min-h-16 w-full items-center rounded-full bg-white px-3 text-[#195a2a] transition hover:translate-x-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="group flex min-h-16 w-full items-center rounded-full bg-white px-3 text-[#1a4c19] transition hover:translate-x-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-[#195a2a] text-white">●</span>
-              <span className="h-2 flex-1 bg-[#195a2a]" />
+              <span className="grid h-10 w-10 place-items-center rounded-full bg-[#1a4c19] text-white">●</span>
+              <span className="h-2 flex-1 bg-[#1a4c19]" />
               <span className="pr-4 text-sm font-black">{text.begin} →</span>
             </button>
           </div>
@@ -281,7 +303,7 @@ function Instructions({ text, language, onBegin, onBack, onHome }) {
           <button type="button" onClick={onBack} className="justify-self-start text-xs font-black text-black/45 underline underline-offset-4">
             {text.back}
           </button>
-          <div className="text-[#668e3f]"><ProgressDots active={2} /></div>
+          <div className="text-[#66883e]"><ProgressDots active={2} /></div>
         </div>
       </div>
     </Shell>
@@ -339,7 +361,7 @@ function QuestionScreen({ question, index, section, answer, text, language, onAn
                   key={option.id}
                   className={`group flex cursor-pointer items-start gap-3 rounded-xl border-2 px-4 py-3 text-[13px] font-semibold leading-snug shadow-sm transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--theme)] ${
                     selected
-                      ? "border-[var(--theme)] bg-[var(--theme)] text-white shadow-md"
+                      ? "border-[var(--theme)] bg-[var(--theme)] text-[var(--contrast)] shadow-md"
                       : "border-black/10 bg-white text-black/75 hover:-translate-y-0.5 hover:border-[var(--theme)]"
                   }`}
                 >
@@ -390,8 +412,8 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
         <p className={`${language === "km" ? "leading-7" : "uppercase tracking-[0.12em]"} mt-1 text-sm font-black opacity-55`}>{localize(winner.archetype, language)}</p>
         {topMatch && (
           <div
-            className="mt-4 rounded-full px-5 py-2 text-lg font-black text-white shadow-sm"
-            style={{ backgroundColor: winner.color }}
+            className="mt-4 rounded-full px-5 py-2 text-lg font-black shadow-sm"
+            style={{ backgroundColor: winner.color, color: getThemeContrast({ color: winner.color }) }}
           >
             {topMatch.percentage.toFixed(1)}% {text.match}
           </div>
@@ -399,7 +421,7 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
 
         <div className="my-7">
           <div
-            className="relative grid h-44 w-44 place-items-center overflow-hidden rounded-[2.8rem] border-4 bg-white shadow-[0_18px_45px_rgba(20,31,23,0.16)]"
+            className="relative grid h-44 w-44 place-items-center overflow-hidden rounded-[2.8rem] border-4 bg-white shadow-[0_18px_45px_rgba(26,76,25,0.16)]"
             style={{ borderColor: winner.color, color: winner.color }}
             aria-label={`${localize(winner.name, language)} portrait`}
           >
@@ -415,8 +437,8 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
         {runnerUp && (
           <div className="mt-8 flex w-full items-center gap-4 rounded-2xl border-2 border-black/8 bg-white p-4 text-left shadow-sm">
             <div
-              className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-2xl font-black text-white"
-              style={{ backgroundColor: runnerUp.color }}
+              className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-2xl font-black"
+              style={{ backgroundColor: runnerUp.color, color: getThemeContrast({ color: runnerUp.color }) }}
               aria-hidden="true"
             >
               {runnerUp.mark}
@@ -640,7 +662,7 @@ export default function Home() {
   if (!hydrated) {
     return (
       <Shell language={language}>
-        <div className="grid flex-1 place-items-center text-[#668e3f]">
+        <div className="grid flex-1 place-items-center text-[#66883e]">
           <div className="animate-pulse"><BrandMark /></div>
         </div>
       </Shell>

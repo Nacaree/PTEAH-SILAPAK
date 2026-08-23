@@ -3,11 +3,11 @@ export const characterIds = ["vitou", "anita", "tohla", "kimly", "mc"];
 const bi = (en, km) => ({ en, km });
 
 export const sections = [
-  { id: "identity", number: 1, title: bi("Identity & Self-Perception", "អត្តសញ្ញាណ និងការមើលឃើញខ្លួនឯង"), subtitle: bi("How do you see yourself?", "តើអ្នកមើលឃើញខ្លួនឯងបែបណា?"), start: 0, end: 4, color: "#195a2a", soft: "#eaf1dc", accent: "#a9cf25", art: "mirror" },
-  { id: "creativity", number: 2, title: bi("Creativity & Making", "ការបង្កើតថ្មី និងសិល្បៈ"), subtitle: bi("How do you create?", "តើអ្នកបង្កើតអ្វីៗឡើងដោយរបៀបណា?"), start: 5, end: 7, color: "#d9471b", soft: "#fff0e8", accent: "#ff6945", art: "spark" },
-  { id: "uncertainty", number: 3, title: bi("Uncertainty & Decision-Making", "ភាពមិនច្បាស់លាស់ និងការសម្រេចចិត្ត"), subtitle: bi("What do you do when there isn't a clear answer?", "តើអ្នកធ្វើដូចម្តេច នៅពេលគ្មានចម្លើយច្បាស់លាស់?"), start: 8, end: 11, color: "#efa6b7", soft: "#fff0f4", accent: "#d85d7b", ink: "#2e1f25", art: "path" },
-  { id: "social", number: 4, title: bi("Social & Relationships", "ទំនាក់ទំនងសង្គម"), subtitle: bi("How do you connect with people?", "តើអ្នកបង្កើតទំនាក់ទំនងជាមួយមនុស្សជុំវិញខ្លួនដោយរបៀបណា?"), start: 12, end: 13, color: "#f8bb18", soft: "#fff7d6", accent: "#df8b00", ink: "#24210f", art: "people" },
-  { id: "belonging", number: 5, title: bi("Place & Belonging", "កន្លែងរស់នៅ និងភាពជាម្ចាស់ផ្ទះ"), subtitle: bi("Where do you fit?", "តើអ្នកសមស្របនឹងកន្លែងណា?"), start: 14, end: 14, color: "#4d59ad", soft: "#eef0ff", accent: "#8794ff", art: "home" },
+  { id: "identity", number: 1, title: bi("Identity & Self-Perception", "អត្តសញ្ញាណ និងការមើលឃើញខ្លួនឯង"), subtitle: bi("How do you see yourself?", "តើអ្នកមើលឃើញខ្លួនឯងបែបណា?"), start: 0, end: 4, color: "#1a4c19", soft: "#fafafa", accent: "#b5d627", art: "mirror" },
+  { id: "creativity", number: 2, title: bi("Creativity & Making", "ការបង្កើតថ្មី និងសិល្បៈ"), subtitle: bi("How do you create?", "តើអ្នកបង្កើតអ្វីៗឡើងដោយរបៀបណា?"), start: 5, end: 7, color: "#c8320d", soft: "#fafafa", accent: "#ff582e", art: "spark" },
+  { id: "uncertainty", number: 3, title: bi("Uncertainty & Decision-Making", "ភាពមិនច្បាស់លាស់ និងការសម្រេចចិត្ត"), subtitle: bi("What do you do when there isn't a clear answer?", "តើអ្នកធ្វើដូចម្តេច នៅពេលគ្មានចម្លើយច្បាស់លាស់?"), start: 8, end: 11, color: "#feb2bf", soft: "#fafafa", accent: "#feb2bf", ink: "#2b2b2b", art: "path" },
+  { id: "social", number: 4, title: bi("Social & Relationships", "ទំនាក់ទំនងសង្គម"), subtitle: bi("How do you connect with people?", "តើអ្នកបង្កើតទំនាក់ទំនងជាមួយមនុស្សជុំវិញខ្លួនដោយរបៀបណា?"), start: 12, end: 13, color: "#b5d627", soft: "#fafafa", accent: "#b5d627", ink: "#2b2b2b", art: "people" },
+  { id: "belonging", number: 5, title: bi("Place & Belonging", "កន្លែងរស់នៅ និងភាពជាម្ចាស់ផ្ទះ"), subtitle: bi("Where do you fit?", "តើអ្នកសមស្របនឹងកន្លែងណា?"), start: 14, end: 14, color: "#66883e", soft: "#fafafa", accent: "#b5d627", ink: "#2b2b2b", art: "home" },
 ];
 
 export const questions = [
@@ -165,7 +165,7 @@ export const questions = [
 
 export const characters = {
   anita: {
-    id: "anita", name: bi("Anita", "អានីតា (Anita)"), archetype: bi("The one who carries too much", "មនុស្សដែលលាក់ទុកសម្ពាធច្រើន"), color: "#e88fa7", mark: "~",
+    id: "anita", name: bi("Anita", "អានីតា (Anita)"), archetype: bi("The one who carries too much", "មនុស្សដែលលាក់ទុកសម្ពាធច្រើន"), color: "#feb2bf", mark: "~",
     summary: bi("You're dependable and caring, but sometimes expect too much from yourself. You don't have to get everything right.", "អ្នកជាមនុស្សដែលអាចពឹងពាក់បាន និងចេះយកចិត្តទុកដាក់ ប៉ុន្តែពេលខ្លះអ្នកដាក់ការរំពឹងទុកលើខ្លួនឯងខ្ពស់ពេក។ អ្នកមិនចាំបាច់ធ្វើអ្វីៗគ្រប់យ៉ាងឱ្យត្រូវឥតខ្ចោះរហូតនោះទេ។"),
     strength: bi("You care deeply", "អ្នកមានចិត្តស្រឡាញ់ និងយកចិត្តទុកដាក់ស្មោះប្រាថ្នា"),
     challenge: bi("Give yourself the same kindness you give others.", "ផ្តល់ក្តីស្រឡាញ់ និងចិត្តសប្បុរសដល់ខ្លួនឯង ឱ្យបានស្មើនឹងអ្វីដែលអ្នកផ្តល់ឱ្យអ្នកដទៃ"),
@@ -173,7 +173,7 @@ export const characters = {
     traits: bi("Patient, gentle, and deeply caring. You’re the person everyone turns to when they need support but rarely lets anyone see when you need help.", "អត់ធ្មត់ ទន់ភ្លន់ និងចេះយកចិត្តទុកដាក់ខ្លាំង។ អ្នកជាមនុស្សដែលគ្រប់គ្នារត់រកពេលត្រូវការកម្លាំងចិត្ត ប៉ុន្តែដាច់ខាតមិនងាយឱ្យនរណាម្នាក់ឃើញឡើយ នៅពេលដែលអ្នកខ្លួនឯងត្រូវការជំនួយ។"),
   },
   kimly: {
-    id: "kimly", name: bi("Kimly", "គឹមលី (Kimly)"), archetype: bi("The One Who Makes Life Feel Lighter", "មនុស្សដែលធ្វើឱ្យជីវិតមានពណ៌សោភ័ណ"), color: "#efad17", mark: "✦",
+    id: "kimly", name: bi("Kimly", "គឹមលី (Kimly)"), archetype: bi("The One Who Makes Life Feel Lighter", "មនុស្សដែលធ្វើឱ្យជីវិតមានពណ៌សោភ័ណ"), color: "#b5d627", mark: "✦",
     summary: bi("You're energetic and expressive, always finding something new to make or get excited about. You don't have to keep creating to be creative.", "អ្នកជាមនុស្សមានថាមពល និងបង្ហាញអារម្មណ៍ច្បាស់ៗ តែងតែស្វែងរកអ្វីថ្មីៗដើម្បីធ្វើ ឬបង្កើតការរំភើប។ អ្នកមិនចាំបាច់ប្រឹងបង្កើតអ្វីៗរហូត ដើម្បីបញ្ជាក់ថាខ្លួនឯងជាមនុស្សមានគំនិតច្នៃប្រឌិតនោះទេ។"),
     strength: bi("You make possibility feel fun.", "អ្នកធ្វើឱ្យអ្វីៗដែលសមស្រប ក្លាយជារឿងសប្បាយរីករាយ"),
     challenge: bi("You're more than what you make.", "តម្លៃរបស់អ្នក គឺធំធេងជាងអ្វីដែលអ្នកបានបង្កើតឡើង"),
@@ -181,7 +181,7 @@ export const characters = {
     traits: bi("Energetic, expressive, and endlessly curious. You brings a sense of warmth and excitement wherever you goes but your constant energy often hides your own doubts.", "មានថាមពល បង្ហាញអារម្មណ៍ច្បាស់ និងចង់ដឹងចង់ឃើញឥតឈប់ឈរ។ អ្នកនាំមកនូវភាពកក់ក្តៅ និងការរំភើបនៅគ្រប់ទីកន្លែងដែលអ្នកទៅ ប៉ុន្តែថាមពលមិនចេះរីងស្ងួតរបស់អ្នក ច្រើនតែលាក់បាំងនូវការសង្ស័យលើខ្លួនឯង។"),
   },
   tohla: {
-    id: "tohla", name: bi("Tohla", "តុលា (Tohla)"), archetype: bi("The One Everyone Depends On", "មនុស្សដែលគ្រប់គ្នាតែងតែពឹងផ្អែក"), color: "#d84b20", mark: "+",
+    id: "tohla", name: bi("Tohla", "តុលា (Tohla)"), archetype: bi("The One Everyone Depends On", "មនុស្សដែលគ្រប់គ្នាតែងតែពឹងផ្អែក"), color: "#c8320d", mark: "+",
     summary: bi("You're energetic and expressive, always finding something new to make or get excited about. You don't have to keep creating to be creative.", "អ្នកជាមនុស្សមានប្រជាប្រិយ និងកក់ក្តៅ តែងតែស្វែងរកអ្វីថ្មីៗមកធ្វើ ឬនាំភាពរីករាយដល់ជុំវិញខ្លួន។ អ្នកមិនចាំបាច់ទាល់តែធ្វើខ្លួនឱ្យមានប្រយោជន៍ រហូតដល់ភ្លេចមើលថែខ្លួនឯងនោះទេ។"),
     strength: bi("You bring people together.", "អ្នកជាចរន្តបណ្តុំមនុស្សឱ្យមកនៅជិតគ្នា"),
     challenge: bi("Let others take care of you sometimes.", "បើកចិត្តឱ្យអ្នកដទៃបានមើលថែទាំអ្នកខ្លះផង"),
@@ -189,7 +189,7 @@ export const characters = {
     traits: bi("Warm, outgoing, resourceful, and naturally dependable. You takes care of everyone so naturally that people forget you needs taking care of too.", "កក់ក្តៅ រួសរាយ រហ័សរហួន និងគួរឱ្យទុកចិត្តតាមធម្មជាតិ។ អ្នកមើលថែទាំអ្នករាល់គ្នាដោយធម្មជាតិ រហូតដល់មនុស្សភាគច្រើនភ្លេចថា អ្នកក៏ត្រូវការការមើលថែទាំដូចគ្នា។"),
   },
   vitou: {
-    id: "vitou", name: bi("Vitou", "វិទូ (Vitou)"), archetype: bi("The One Who Never Stop Exploring.", "មនុស្សដែលមិនដែលឈប់រុករក"), color: "#5f8f3d", mark: "?",
+    id: "vitou", name: bi("Vitou", "វិទូ (Vitou)"), archetype: bi("The One Who Never Stop Exploring.", "មនុស្សដែលមិនដែលឈប់រុករក"), color: "#66883e", mark: "?",
     summary: bi("You're endlessly curious and love discovering new things, but sometimes wonder if you need novelty to feel interesting.", "អ្នកមានភាពចង់ដឹងចង់ឃើញឥតឈប់ឈរ និងស្រឡាញ់ការស្វែងរកអ្វីថ្មីៗ ប៉ុន្តែពេលខ្លះតែងសួរខ្លួនឯងថា តើអ្នកពិតជាត្រូវការអ្វីថ្មីជានិច្ច ដើម្បីឱ្យខ្លួនឯងមើលទៅគួរឱ្យចាប់អារម្មណ៍មែនទេ?"),
     strength: bi("You see possibilities everywhere.", "អ្នកមើលឃើញលទ្ធភាព និងឱកាសថ្មីៗនៅគ្រប់ទីកន្លែង"),
     challenge: bi("You don't have to prove you're interesting.", "អ្នកមិនចាំបាច់ប្រឹងប្រែងដើម្បីបញ្ជាក់ថាខ្លួនឯងគួរឱ្យចាប់អារម្មណ៍នោះទេ"),
@@ -197,7 +197,7 @@ export const characters = {
     traits: bi("Trait: Curious, opinionated, and playful. You comes across as confident, sometimes even arrogant, but beneath that confidence is someone constantly questioning themselves.", "ចង់ដឹងចង់ឃើញ មានគំនិតផ្ទាល់ខ្លួន និងចេះលេងសើច។ អ្នកមើលទៅដូចជាមានទំនុកចិត្ត (ពេលខ្លះមើលទៅដូចឆ្មើងឆ្មៃបន្តិច) ប៉ុន្តែនៅពីក្រោយទំនុកចិត្តនោះ គឺជានរណាម្នាក់ដែលតែងតែសង្ស័យលើខ្លួនឯង។"),
   },
   mc: {
-    id: "mc", name: bi("MC", "MC"), archetype: bi("The One Looking For The Right Answer.", "មនុស្សដែលតែងតែស្វែងរកចម្លើយដ៏ត្រឹមត្រូវ"), color: "#4d59ad", mark: "…",
+    id: "mc", name: bi("MC", "MC"), archetype: bi("The One Looking For The Right Answer.", "មនុស្សដែលតែងតែស្វែងរកចម្លើយដ៏ត្រឹមត្រូវ"), color: "#1a4c19", mark: "…",
     summary: bi("You're thoughtful, observant, and harder on yourself than you realise. You like clarity, but you're learning not everything needs an answer.", "អ្នកជាមនុស្សគិតគូរច្រើន ពូកែសង្កេត និងតឹងរ៉ឹងចំពោះខ្លួនឯងជាងអ្វីដែលអ្នកគិត។ អ្នកចូលចិត្តភាពច្បាស់លាស់ ប៉ុន្តែអ្នកកំពុងរៀនសូត្រថា មិនមែនគ្រប់យ៉ាងសុទ្ធតែត្រូវការចម្លើយនោះទេ។"),
     strength: bi("You notice the little things.", "អ្នកចាប់អារម្មណ៍ និងយកចិត្តទុកដាក់លើរឿងតូចតាចបានយ៉ាងល្អ"),
     challenge: bi("Trust yourself a little more.", "ចូលរៀនជឿជាក់លើខ្លួនឯងឱ្យបានច្រើនជាងមុនបន្តិច"),

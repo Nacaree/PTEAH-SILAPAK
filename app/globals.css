@@ -29,7 +29,9 @@ body {
 }
 
 .font-khmer {
-  font-family: "Noto Sans Khmer", "Khmer OS Battambang", "Khmer Sangam MN", Arial, sans-serif;
+  font-family:
+    "Noto Sans Khmer", "Khmer OS Battambang", "Khmer Sangam MN", Arial,
+    sans-serif;
 }
 
 button,
@@ -48,9 +50,10 @@ button:disabled {
 
 .brand-logo {
   display: block;
-  width: 16rem;
-  height: 14rem;
+  width: min(21rem, calc(100vw - 2rem));
+  height: 23.5rem;
   object-fit: cover;
+  transform: translateX(13px);
   object-position: center;
 }
 
@@ -61,6 +64,154 @@ button:disabled {
   overflow: hidden;
   border-radius: 999px;
   background: white;
+}
+
+.cover-header {
+  border-radius: 0 0 3rem 3rem;
+}
+
+.cover-header-wordmark {
+  width: 7rem;
+  height: 3rem;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0) invert(1);
+}
+
+.cover-asset {
+  position: absolute;
+  pointer-events: none;
+}
+
+.cover-asset > img {
+  filter: drop-shadow(0 6px 2px rgb(43 43 43 / 28%));
+}
+
+.cover-asset--key > img {
+  filter: drop-shadow(0 5px 2px rgb(43 43 43 / 14%));
+}
+
+.cover-asset-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid rgb(43 43 43 / 10%);
+  box-shadow: 0 8px 18px rgb(43 43 43 / 10%);
+  color: #fafafa;
+  font-size: 0.55rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.05;
+  text-align: center;
+  transition: opacity 120ms linear;
+}
+
+.cover-asset-fallback--key {
+  overflow: visible;
+  border: 0;
+  box-shadow: none;
+}
+
+.cover-key-shape {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.cover-key-head {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 10.5rem;
+  height: 10.5rem;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #b5d627;
+}
+
+.cover-key-head::after {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  content: "";
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: #fafafa;
+}
+
+.cover-key-stem {
+  position: absolute;
+  left: 50%;
+  top: 8rem;
+  width: 4.4rem;
+  height: 10.2rem;
+  transform: translateX(-50%);
+  border-radius: 0 0 2.2rem 2.2rem;
+  background: #b5d627;
+}
+
+.cover-key-stem::after {
+  position: absolute;
+  right: -0.7rem;
+  bottom: 1.3rem;
+  width: 1.7rem;
+  height: 2.8rem;
+  content: "";
+  background: #fafafa;
+  clip-path: polygon(45% 0, 100% 20%, 48% 45%, 100% 66%, 45% 100%, 0 100%, 0 0);
+}
+
+.cover-asset-fallback--notebook {
+  border-radius: 0.4rem;
+  background: linear-gradient(180deg, #66883e 0 72%, #fafafa 72% 76%, #66883e 76%);
+}
+
+.cover-asset-fallback--fortune {
+  border-radius: 0.35rem;
+  background: linear-gradient(90deg, #ff582e 0 33%, #b5d627 33% 66%, #2b2b2b 66%);
+}
+
+.cover-asset-fallback--green-ticket {
+  border-radius: 0.7rem;
+  background: #b5d627;
+  color: #66883e;
+}
+
+.cover-asset-fallback--student-id {
+  background: linear-gradient(165deg, #fafafa 0 70%, #66883e 70%);
+  color: #66883e;
+}
+
+.cover-asset-fallback--receipt {
+  background: repeating-linear-gradient(0deg, #fafafa 0 15px, #ff582e 15px 18px);
+  color: #c8320d;
+}
+
+.cover-asset-fallback--ticket-stub {
+  background: linear-gradient(90deg, #fafafa 0 72%, #ff582e 72%);
+  color: #2b2b2b;
+}
+
+.cover-asset-fallback--boarding-pass {
+  background: linear-gradient(160deg, #feb2bf 0 36%, #fafafa 36% 74%, #ff582e 74%);
+  color: #c8320d;
+}
+
+.cover-asset-fallback--camera {
+  border-radius: 0.45rem;
+  background: #b5d627;
+  color: #fafafa;
+  font-size: 2.6rem;
+}
+
+.cover-asset-fallback--passport {
+  border-radius: 0.45rem;
+  background: #feb2bf;
+  color: #c8320d;
 }
 
 .motif-band {

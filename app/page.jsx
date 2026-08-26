@@ -184,22 +184,18 @@ function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, lan
     <Shell language={language}>
       <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 text-[#66883e]">
         <BrandMark />
-        <p className="mt-4 max-w-56 text-center text-sm font-semibold text-black/50">
-          {text.landingTagline}
-        </p>
 
-        <div className="mt-10 flex rounded-full border border-[#66883e]/30 bg-white p-1 shadow-sm">
-          {Object.entries(languages).map(([id, languageOption]) => (
+        <div className="mt-6 flex overflow-hidden">
+          {["km", "en"].map((id) => (
             <button
               key={id}
               type="button"
               onClick={() => onLanguage(id)}
-              aria-pressed={language === id}
-              className={`min-w-20 rounded-full px-5 py-2.5 text-xs font-black tracking-[0.12em] transition focus-visible:outline-2 focus-visible:outline-[#66883e] ${
-                language === id ? "bg-[#66883e] text-white" : "text-[#66883e] hover:bg-[#b5d627]/20"
-              }`}
+              className={`grid min-h-12 w-[6.75rem] place-items-center px-4 text-2xl font-black tracking-[0.06em] text-white transition hover:brightness-95 focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white ${id === "km" ? "bg-[#b5d627]" : "bg-[#66883e]"}`}
             >
-              {languageOption.label}
+              <span className="translate-x-[-1px] translate-y-0.5">
+                {languages[id].label}
+              </span>
             </button>
           ))}
         </div>
@@ -217,26 +213,112 @@ function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, lan
           </div>
         )}
       </div>
-      <div className="h-2 bg-[#b5d627]" />
     </Shell>
+  );
+}
+
+function CoverAsset({ filename, variant, className, imageClassName = "", label }) {
+  const [loaded, setLoaded] = useState(false);
+
+  return (
+    <div className={`cover-asset cover-asset--${variant} ${className}`} aria-hidden="true">
+      <div className={`cover-asset-fallback cover-asset-fallback--${variant} ${loaded ? "opacity-0" : "opacity-100"}`}>
+        {variant === "key" ? (
+          <div className="cover-key-shape">
+            <span className="cover-key-head" />
+            <span className="cover-key-stem" />
+          </div>
+        ) : (
+          <span>{label}</span>
+        )}
+      </div>
+      <img
+        src={`/assets/${filename}`}
+        alt=""
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(false)}
+        className={`absolute inset-0 h-full w-full object-contain transition-opacity ${imageClassName} ${loaded ? "opacity-100" : "opacity-0"}`}
+      />
+    </div>
   );
 }
 
 function Cover({ text, language, onEnter, onBack }) {
   return (
-    <Shell theme={baseTheme} patterned language={language}>
-      <TopBrand onHome={onBack} text={text} />
-      <div className="relative flex flex-1 flex-col items-center px-8 pb-7 pt-9 text-center">
-        <div className="absolute left-5 top-32 rotate-[-12deg] text-5xl opacity-70" aria-hidden="true">▤</div>
-        <div className="absolute bottom-24 right-5 rotate-12 text-5xl opacity-70" aria-hidden="true">▰</div>
-        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#66883e]/60">{text.invitation}</p>
-        <h1 className={`${language === "km" ? "text-3xl leading-[1.35]" : "text-4xl leading-[0.95]"} mt-3 font-black tracking-tight text-[#66883e]`}>{text.title}</h1>
-        <p className="mt-3 text-xs font-bold text-black/45">{text.subtitle}</p>
-        <div className="my-auto py-7">
-          <ArtworkPlaceholder kind="key" color="#66883e" label="key artwork" large />
+    <Shell theme={baseTheme} language={language}>
+      <header className="cover-header relative grid h-24 shrink-0 place-items-center bg-[#66883e]">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label={text.home}
+          className="grid h-14 w-28 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          <img
+            src="/assets/pteah-silapak-wordmark.png"
+            alt="Pteah Silapak"
+            className="cover-header-wordmark"
+          />
+        </button>
+      </header>
+
+      <div className="relative min-h-0 flex-1 overflow-hidden text-center">
+        <div className="absolute inset-x-6 top-10 z-20 flex flex-col items-center">
+          <h1 className={`${language === "km" ? "max-w-[340px] text-[1.8rem] leading-[1.45]" : "max-w-[350px] text-[2.8rem] leading-[0.92]"} whitespace-pre-line font-black tracking-tight text-[#66883e]`}>
+            {language === "en" ? "Find Your\nCreative Room" : text.title}
+          </h1>
+          <p className={`${language === "km" ? "mt-4 text-sm" : "mt-4 text-base"} font-black text-[#1a4c19]`}>
+            {text.subtitle}
+          </p>
         </div>
-        <PrimaryButton onClick={onEnter}>{text.enter}</PrimaryButton>
-        <div className="mt-8 text-[#66883e]"><ProgressDots active={0} /></div>
+
+        <CoverAsset
+          filename="KeyCharacter_essential.png"
+          variant="key"
+          label="Key"
+          className="left-1/2 top-[184px] z-10 h-[280px] w-[190px] -translate-x-1/2"
+          imageClassName="rotate-90 scale-[1.65]"
+        />
+
+        <CoverAsset filename="Character_essential-09.png" variant="notebook" label="A N I T A" className="left-1 top-[190px] h-[132px] w-[105px] rotate-[12deg]"
+        imageClassName="scale-[1.4]" />
+
+        <CoverAsset filename="VitouItemCharacter_essential.png" variant="fortune" label="FORTUNE" className="-right-4 top-[188px] h-[90px] w-[108px] rotate-[50deg]"
+        imageClassName="scale-[1.65]" />
+
+        <CoverAsset filename="2Character_essential-08.png" variant="green-ticket" label="ANITA" className="-left-4 top-[364px] h-[64px] w-[118px] rotate-[280deg]"
+        imageClassName="scale-[1.65]" />
+
+        <CoverAsset filename="Character_essential-07.png" variant="student-id" label="STUDENT ID" className="-right-2 top-[325px] h-[122px] w-[102px] rotate-[289deg]" imageClassName="rotate-90 scale-[1.4]" 
+         />
+
+        <CoverAsset filename="Character_essential-10.png" variant="receipt" label="LUCKY STORE" className="-left-0.2 top-[433px] h-[122px] w-[98px] rotate-[26deg]"
+        imageClassName="scale-[1.2]"
+         />
+
+        <CoverAsset filename="2Character_essential-07.png" variant="ticket-stub" label="A13" className="-right-5 top-115 h-[70px] w-[128px] -rotate-[106deg]" imageClassName="scale-[1.9]" />
+
+        <CoverAsset filename="2Character_essential-09.png" variant="boarding-pass" label="TICKET" className="-left-5 top-[545px] h-[116px] w-[116px] -rotate-[49deg]"
+        imageClassName="scale-[1.2]"
+        />
+
+        <CoverAsset filename="2Character_essential-06.png" variant="camera" label="●" className="-bottom-5 -left-2 h-[92px] w-[122px] -rotate-[102deg]"
+        imageClassName="scale-[1.4]" />
+
+        <CoverAsset filename="Character_essential-06.png" variant="passport" label="HOUSE OF CREATIVE" className="-bottom-3 -right-2 h-[146px] w-[112px] -rotate-[12deg]" />
+
+        <button
+          type="button"
+          onClick={onEnter}
+          className="absolute left-1/2 top-[510px] z-30 grid min-h-16 w-48 -translate-x-1/2 place-items-center rounded-[1.75rem] bg-[#66883e] px-6 text-2xl font-black text-white shadow-[0_12px_26px_rgba(26,76,25,0.12)] transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#66883e]"
+        >
+          {text.enter}
+        </button>
+
+        <div className="absolute inset-x-0 bottom-5 z-30 flex justify-center gap-2" aria-label="Step 1 of 3">
+          <span className="h-3 w-3 rounded-full bg-[#2b2b2b]" />
+          <span className="h-3 w-3 rounded-full bg-black/15" />
+          <span className="h-3 w-3 rounded-full bg-black/15" />
+        </div>
       </div>
     </Shell>
   );

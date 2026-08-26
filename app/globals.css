@@ -226,6 +226,20 @@ button:disabled {
   mix-blend-mode: multiply;
 }
 
+.motif-mask {
+  width: 34rem;
+  height: 24rem;
+  background-color: var(--pattern-color);
+  -webkit-mask-image: url("/assets/pteah-silapak-pattern.png");
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-image: url("/assets/pteah-silapak-pattern.png");
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

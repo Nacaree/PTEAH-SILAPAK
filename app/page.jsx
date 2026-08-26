@@ -79,18 +79,22 @@ function ArtworkPlaceholder({ kind, color = "#66883e", label, large = false }) {
   );
 }
 
-function PatternBand({ color, accent }) {
+function PatternBand({ color, accent, className = "", exactColors = false }) {
   return (
     <div
-      className="motif-band relative h-12 w-full shrink-0 overflow-hidden"
+      className={`motif-band relative h-12 w-full shrink-0 overflow-hidden ${className}`}
       style={{ "--pattern-color": color, "--pattern-accent": accent }}
       aria-hidden="true"
     >
-      <img
-        src="/assets/pteah-silapak-pattern.png"
-        alt=""
-        className="motif-art pointer-events-none absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
-      />
+      {exactColors ? (
+        <span className="motif-mask pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
+      ) : (
+        <img
+          src="/assets/pteah-silapak-pattern.png"
+          alt=""
+          className="motif-art pointer-events-none absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
+        />
+      )}
     </div>
   );
 }
@@ -118,6 +122,7 @@ function Shell({ children, theme = baseTheme, patterned = false, scroll = false,
           "--theme": theme.color,
           "--soft": theme.soft,
           "--accent": theme.accent,
+          "--accent-contrast": theme.accentContrast || theme.ink || "#2b2b2b",
           "--ink": theme.ink || "#2b2b2b",
           "--contrast": getThemeContrast(theme),
         }}
@@ -217,27 +222,15 @@ function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, lan
   );
 }
 
-function CoverAsset({ filename, variant, className, imageClassName = "", label }) {
-  const [loaded, setLoaded] = useState(false);
-
+function CoverAsset({ filename, variant, className, imageClassName = "" }) {
   return (
     <div className={`cover-asset cover-asset--${variant} ${className}`} aria-hidden="true">
-      <div className={`cover-asset-fallback cover-asset-fallback--${variant} ${loaded ? "opacity-0" : "opacity-100"}`}>
-        {variant === "key" ? (
-          <div className="cover-key-shape">
-            <span className="cover-key-head" />
-            <span className="cover-key-stem" />
-          </div>
-        ) : (
-          <span>{label}</span>
-        )}
-      </div>
       <img
         src={`/assets/${filename}`}
         alt=""
-        onLoad={() => setLoaded(true)}
-        onError={() => setLoaded(false)}
-        className={`absolute inset-0 h-full w-full object-contain transition-opacity ${imageClassName} ${loaded ? "opacity-100" : "opacity-0"}`}
+        loading="eager"
+        decoding="sync"
+        className={`absolute inset-0 h-full w-full object-contain ${imageClassName}`}
       />
     </div>
   );
@@ -314,11 +307,6 @@ function Cover({ text, language, onEnter, onBack }) {
           {text.enter}
         </button>
 
-        <div className="absolute inset-x-0 bottom-5 z-30 flex justify-center gap-2" aria-label="Step 1 of 3">
-          <span className="h-3 w-3 rounded-full bg-[#2b2b2b]" />
-          <span className="h-3 w-3 rounded-full bg-black/15" />
-          <span className="h-3 w-3 rounded-full bg-black/15" />
-        </div>
       </div>
     </Shell>
   );
@@ -326,24 +314,55 @@ function Cover({ text, language, onEnter, onBack }) {
 
 function Story({ text, language, onNext, onBack, onHome }) {
   return (
-    <Shell theme={baseTheme} patterned language={language}>
-      <TopBrand onHome={onHome} text={text} />
-      <div className="flex flex-1 flex-col px-7 pb-6 pt-8">
-        <div className="text-5xl text-[#66883e]" aria-hidden="true">⚿</div>
-        <h1 className={`${language === "km" ? "text-3xl leading-relaxed" : "text-4xl"} mt-3 font-black tracking-tight text-[#66883e]`}>{text.introduction}</h1>
-        <div className="mt-4 rounded-2xl bg-[#66883e] p-5 text-sm font-semibold leading-relaxed text-white shadow-lg">
-          <p>{text.story}</p>
-          <p className="mt-3 text-xs text-white/75">{text.storyNote}</p>
+    <Shell theme={baseTheme} language={language}>
+      <header className="cover-header relative grid h-24 shrink-0 place-items-center bg-[#66883e]">
+        <button
+          type="button"
+          onClick={onHome}
+          aria-label={text.home}
+          className="grid h-14 w-32 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          <img
+            src="/assets/pteah-silapak-wordmark.png"
+            alt="Pteah Silapak"
+            className="cover-header-wordmark"
+          />
+        </button>
+      </header>
+      <div className="flex min-h-0 flex-1 flex-col px-5 pb-5 pt-[7.5rem]">
+        <h1 className={`${language === "km" ? "text-3xl leading-relaxed" : "text-[3.35rem] leading-none"} text-center font-black tracking-tight text-[#66883e]`}>{text.introduction}</h1>
+
+        <div className="mt-10 overflow-hidden rounded-[1.25rem] border-2 border-[#2b2b2b] bg-white shadow-[0_7px_4px_rgba(43,43,43,0.18)]">
+          <div className="flex min-h-[146px] flex-col items-center justify-center bg-[#66883e] px-6 py-3 text-center text-white">
+            <p className={`${language === "km" ? "text-sm leading-7" : "text-base leading-[1.28]"} font-medium`}>
+              {text.story}
+            </p>
+            <img
+              src="/assets/pslogowhite.png"
+              alt=""
+              aria-hidden="true"
+              className="my-2 h-7 w-8 object-contain"
+            />
+            <p className={`${language === "km" ? "text-sm leading-7" : "text-base leading-tight"} font-medium`}>
+              {text.storyNote}
+            </p>
+          </div>
+
+          <div className="grid h-10 place-items-center border-t-2 border-[#2b2b2b] bg-white">
+            <img
+              src="/assets/keyholes.png"
+              alt=""
+              aria-hidden="true"
+              className="h-7 w-6 object-contain"
+            />
+          </div>
         </div>
-        <div className="my-auto flex justify-center py-7">
-          <ArtworkPlaceholder kind="group" color="#66883e" label="five housemates" large />
-        </div>
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-          <button type="button" onClick={onBack} className="justify-self-start text-xs font-black text-black/45 underline underline-offset-4">
+
+        <div className="mt-auto grid grid-cols-2 items-center gap-3">
+          <button type="button" onClick={onBack} className="grid min-h-12 min-w-20 place-items-center justify-self-start text-base font-black text-black/45 underline underline-offset-4">
             {text.back}
           </button>
-          <div className="text-[#66883e]"><ProgressDots active={1} /></div>
-          <button type="button" onClick={onNext} className="justify-self-end rounded-full bg-[#66883e] px-5 py-2 text-xs font-black text-white">
+          <button type="button" onClick={onNext} className="min-h-12 justify-self-end rounded-full bg-[#66883e] px-7 py-3 text-base font-black text-white">
             {text.next} →
           </button>
         </div>
@@ -354,63 +373,131 @@ function Story({ text, language, onNext, onBack, onHome }) {
 
 function Instructions({ text, language, onBegin, onBack, onHome }) {
   return (
-    <Shell theme={baseTheme} patterned language={language}>
-      <TopBrand onHome={onHome} text={text} />
-      <div className="flex flex-1 flex-col justify-center px-6 py-8">
-        <p className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.22em] text-[#66883e]/60">{text.beforeYouEnter}</p>
-        <div className="overflow-hidden rounded-[2rem] border-2 border-[#1a4c19] bg-white shadow-[0_18px_44px_rgba(26,76,25,0.14)]">
-          {text.instructions.map((instruction, index) => (
-            <div
-              key={instruction}
-              className={`grid min-h-24 place-items-center px-6 text-center font-black uppercase tracking-wide ${
-                index === 1 ? "bg-[#1a4c19] text-white" : index === 2 ? "bg-[#1a4c19] text-white" : "text-[#1a4c19]"
-              } ${index > 0 ? "border-t-2 border-[#1a4c19]" : ""}`}
-            >
-              <span className={index === 0 ? "max-w-56 text-sm" : "text-lg"}>{instruction}</span>
-            </div>
-          ))}
-          <div className="bg-[#1a4c19] px-7 pb-8 pt-4">
+    <Shell theme={baseTheme} language={language}>
+      <header className="cover-header relative grid h-24 shrink-0 place-items-center bg-[#66883e]">
+        <button
+          type="button"
+          onClick={onHome}
+          aria-label={text.home}
+          className="grid h-14 w-32 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          <img
+            src="/assets/pteah-silapak-wordmark.png"
+            alt="Pteah Silapak"
+            className="cover-header-wordmark"
+          />
+        </button>
+      </header>
+
+      <div className="relative flex min-h-0 flex-1 flex-col px-0 pb-0 pt-[clamp(4.5rem,10vh,9.5rem)]">
+        <h1 className={`${language === "km" ? "text-4xl leading-relaxed" : "text-[3.35rem] leading-none"} px-4 text-center font-black tracking-tight text-[#66883e]`}>
+          {text.instructionTitle}
+        </h1>
+
+        <div className="relative isolate mt-8 flex min-h-0 flex-1 flex-col">
+          <div className="pointer-events-none absolute -inset-x-1 bottom-0 top-[98px] z-0 bg-[#1a4c19]" aria-hidden="true" />
+
+          <div className="relative z-10 grid min-h-[130px] shrink-0 place-items-center rounded-t-[2.5rem] border-2 border-[#2b2b2b] bg-white px-8 pb-8 text-center text-lg font-black leading-tight text-[#1a4c19] shadow-[0_5px_3px_rgba(43,43,43,0.16)]">
+            {text.instructions[0]}
+          </div>
+
+          <div className="relative z-20 -mx-0.5 -mt-8 h-[90px] w-[calc(100%+4px)] shrink-0 rounded-t-[2.5rem] border-2 border-b-0 border-[#2b2b2b] bg-[#1a4c19] shadow-[0_5px_3px_rgba(43,43,43,0.15)]" aria-hidden="true" />
+
+          <div className="relative z-30 -mt-8 grid min-h-[112px] shrink-0 place-items-center rounded-t-[2.5rem] border-2 border-[#2b2b2b] bg-white px-6 pb-8 text-center text-2xl font-black text-[#1a4c19] shadow-[0_5px_3px_rgba(43,43,43,0.15)]">
+            {text.instructions[1]}
+          </div>
+
+          <div className="relative z-40 -mx-0.5 -mt-8 flex min-h-[190px] w-[calc(100%+4px)] flex-1 flex-col items-center rounded-t-[2.5rem] border-2 border-b-0 border-[#2b2b2b] bg-[#1a4c19] px-2 pb-14 pt-4 text-white shadow-[0_5px_3px_rgba(43,43,43,0.15)]">
+            <p className="text-center text-2xl font-black">{text.instructions[2]}</p>
             <button
               type="button"
               onClick={onBegin}
-              className="group flex min-h-16 w-full items-center rounded-full bg-white px-3 text-[#1a4c19] transition hover:translate-x-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              className="relative mt-1 min-h-[136px] w-full max-w-[400px] flex-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              aria-label={text.begin}
             >
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-[#1a4c19] text-white">●</span>
-              <span className="h-2 flex-1 bg-[#1a4c19]" />
-              <span className="pr-4 text-sm font-black">{text.begin} →</span>
+              <img
+                src="/assets/KeyCharacter_essential.png"
+                alt=""
+                aria-hidden="true"
+                loading="eager"
+                decoding="sync"
+                className="absolute inset-0 h-full w-full scale-[1.24] object-contain drop-shadow-[0_5px_2px_rgba(43,43,43,0.22)]"
+              />
             </button>
+            <div className="pointer-events-none relative z-10 -mt-2 mb-1 flex flex-col items-center text-center text-sm font-bold text-white/85">
+              <span aria-hidden="true" className="relative -top-3 text-2xl leading-none">
+                ↑
+              </span>
+              <span>{text.keyPrompt}</span>
+            </div>
           </div>
         </div>
-        <div className="mt-7 grid grid-cols-[1fr_auto_1fr] items-center">
-          <button type="button" onClick={onBack} className="justify-self-start text-xs font-black text-black/45 underline underline-offset-4">
-            {text.back}
-          </button>
-          <div className="text-[#66883e]"><ProgressDots active={2} /></div>
-        </div>
+
+        <button type="button" onClick={onBack} className="absolute bottom-2 left-4 z-50 grid min-h-12 min-w-20 place-items-center text-base font-black text-white/75 underline underline-offset-4">
+          {text.back}
+        </button>
       </div>
     </Shell>
   );
 }
 
 function SectionIntro({ section, text, language, onContinue, onBack, onHome }) {
+  const sectionTitle = localize(section.title, language);
+  const displayTitle = language === "en" ? sectionTitle.replace(" & ", "\n&\n") : sectionTitle;
+
   return (
-    <Shell theme={section} patterned language={language}>
-      <TopBrand onHome={onHome} theme={section} text={text} />
-      <div className="relative flex flex-1 flex-col items-center justify-center px-8 py-9 text-center">
-        <p className="text-xs font-black uppercase tracking-[0.24em] opacity-60">{text.section} {section.number}</p>
-        <div className="my-8">
-          <ArtworkPlaceholder kind={section.art} color={section.color} label="temporary character" />
-        </div>
-        <h1 className={`${language === "km" ? "text-3xl leading-[1.45]" : "text-4xl uppercase leading-[0.92]"} max-w-xs font-black tracking-tight`}>{localize(section.title, language)}</h1>
-        <p className={`${language === "km" ? "leading-7" : ""} mt-4 max-w-72 text-sm font-semibold opacity-65`}>{localize(section.subtitle, language)}</p>
-        <div className="mt-10 flex w-full max-w-xs items-center justify-between gap-3">
-          <button type="button" onClick={onBack} className="px-3 py-2 text-xs font-black underline decoration-current/30 underline-offset-4">
-            {text.back}
+    <Shell theme={section} language={language}>
+      <header className="shrink-0">
+        <PatternBand color={section.patternMotif || "#66883e"} accent={section.patternBackground || section.color} exactColors className="h-[clamp(7rem,17dvh,9rem)]" />
+        <div className="cover-header relative grid h-14 place-items-center" style={{ backgroundColor: section.headerColor || "#66883e" }}>
+          <button
+            type="button"
+            onClick={onHome}
+            aria-label={text.home}
+            className="grid h-12 w-28 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            <img
+              src="/assets/pteah-silapak-wordmark.png"
+              alt="Pteah Silapak"
+              className="cover-header-wordmark h-10 w-24"
+            />
           </button>
-          <PrimaryButton onClick={onContinue}>{text.enterSection} →</PrimaryButton>
         </div>
+      </header>
+
+      <div className="flex min-h-0 flex-1 flex-col pt-[clamp(3rem,9dvh,5rem)] text-center">
+        <div className="relative z-10 grid min-h-[74px] shrink-0 place-items-center rounded-t-[2.5rem] border-2 border-b-0 border-[var(--theme)] bg-[#fafafa] px-5 text-[1.35rem] font-bold uppercase text-[var(--theme)]">
+          {text.section} {section.number}
+        </div>
+
+        <section className="relative -mt-px flex min-h-0 flex-1 flex-col bg-[var(--theme)] px-6 pb-5 pt-5 text-[var(--contrast)]">
+          <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+            <h1 className={`${language === "km" ? "max-w-[350px] text-[1.8rem] leading-[1.55]" : "max-w-[360px] whitespace-pre-line text-[2.15rem] uppercase leading-[1.28]"} font-black tracking-tight`}>
+              {displayTitle}
+            </h1>
+            <p className={`${language === "km" ? "mt-4 max-w-[350px] text-base leading-8" : "mt-3 max-w-xs text-base italic"} font-medium`}>
+              {localize(section.subtitle, language)}
+            </p>
+          </div>
+
+          <div className="flex w-full items-center justify-between gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onBack}
+              className="min-h-12 px-3 text-sm font-black underline decoration-current/45 underline-offset-4"
+            >
+              {text.back}
+            </button>
+            <button
+              type="button"
+              onClick={onContinue}
+              className="min-h-12 rounded-full bg-[#fafafa] px-7 py-3 text-sm font-black tracking-wide text-[var(--theme)] shadow-[0_8px_20px_rgba(43,43,43,0.18)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              {text.enterSection} →
+            </button>
+          </div>
+        </section>
       </div>
-      <BottomNav onHome={onHome} text={text} />
     </Shell>
   );
 }
@@ -420,31 +507,32 @@ function QuestionScreen({ question, index, section, answer, text, language, onAn
   const sectionTotal = section.end - section.start + 1;
 
   return (
-    <Shell theme={section} patterned language={language}>
-      <TopBrand onHome={onHome} theme={section} text={text} />
-      <div className="flex min-h-0 flex-1 flex-col px-5 pb-4 pt-5">
-        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] opacity-60">
+    <Shell theme={section} language={language}>
+      <PatternBand color={section.patternMotif || section.color} accent={section.patternBackground || "#66883e"} exactColors className="h-[clamp(3.5rem,9dvh,5rem)]" />
+
+      <div className="flex min-h-0 flex-1 flex-col bg-[var(--theme)] px-5 pb-4 pt-4 text-[var(--contrast)]">
+        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.18em] opacity-80">
           <span>{sectionPosition}/{sectionTotal} {text.inSection}</span>
           <span>{index + 1}/15</span>
         </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-black/10" aria-hidden="true">
-          <div className="h-full rounded-full bg-[var(--theme)] transition-all duration-300" style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
+        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/25" aria-hidden="true">
+          <div className="h-full rounded-full bg-[var(--accent)] transition-all duration-300" style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
         </div>
 
-        <fieldset className="mt-5 min-h-0 flex-1">
-          <legend className={`${language === "km" ? "text-[1.15rem] leading-[1.65]" : "text-[1.45rem] leading-[1.04]"} mx-auto block max-w-[370px] px-2 text-center font-black tracking-tight`}>
+        <fieldset className="mt-5 flex min-h-0 flex-1 flex-col">
+          <legend className={`${language === "km" ? "text-[1.15rem] leading-[1.65]" : "text-[1.55rem] leading-[1.08]"} mx-auto block max-w-[370px] px-2 text-center font-black tracking-tight`}>
             {localize(question.prompt, language)}
           </legend>
-          <div className="mt-5 grid gap-2.5">
+          <div className="mt-[clamp(1.75rem,5dvh,3.5rem)] flex flex-1 flex-col items-center gap-[clamp(0.75rem,2.5dvh,2rem)]">
             {question.options.map((option, optionIndex) => {
               const selected = answer === option.id;
               return (
                 <label
                   key={option.id}
-                  className={`group flex cursor-pointer items-start gap-3 rounded-xl border-2 px-4 py-3 text-[13px] font-semibold leading-snug shadow-sm transition focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-[var(--theme)] ${
+                  className={`group flex min-h-[54px] w-fit cursor-pointer items-center gap-2 rounded-md px-3 py-3 text-base font-medium leading-snug focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-white ${language === "km" ? "min-w-[240px] max-w-[94%]" : "min-w-[180px] max-w-[88%]"} ${
                     selected
-                      ? "border-[var(--theme)] bg-[var(--theme)] text-[var(--contrast)] shadow-md"
-                      : "border-black/10 bg-white text-black/75 hover:-translate-y-0.5 hover:border-[var(--theme)]"
+                      ? "bg-[var(--accent)] text-[var(--accent-contrast)] shadow-[0_4px_0_rgba(43,43,43,0.18)]"
+                      : "bg-[#fafafa] text-[#2b2b2b]"
                   }`}
                 >
                   <input
@@ -455,27 +543,42 @@ function QuestionScreen({ question, index, section, answer, text, language, onAn
                     onChange={() => onAnswer(question.id, option.id)}
                     className="sr-only"
                   />
-                  <span className={`grid h-6 w-6 shrink-0 place-items-center rounded-full text-[10px] font-black ${selected ? "bg-white text-[var(--theme)]" : "bg-[var(--soft)] text-[var(--theme)]"}`}>
-                    {String.fromCharCode(65 + optionIndex)}
+                  <span className="shrink-0 font-medium">
+                    {String.fromCharCode(65 + optionIndex)}.
                   </span>
-                  <span className={`${language === "km" ? "leading-6" : ""} pt-0.5`}>{localize(option.text, language)}</span>
-                  {selected && <span className="ml-auto pt-0.5 text-xs" aria-label={text.selected}>✓</span>}
+                  <span className={language === "km" ? "leading-6" : ""}>{localize(option.text, language)}</span>
+                  {selected && <span className="ml-auto text-xs" aria-label={text.selected}>✓</span>}
                 </label>
               );
             })}
           </div>
         </fieldset>
 
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <button type="button" onClick={onBack} className="min-h-11 rounded-full px-4 text-xs font-black underline decoration-current/30 underline-offset-4">
-            ← {text.back}
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <button type="button" onClick={onBack} className="min-h-11 rounded-full px-4 text-sm font-black underline decoration-current/45 underline-offset-4">
+            {text.back}
           </button>
-          <PrimaryButton onClick={onNext} disabled={!answer}>
+          <button
+            type="button"
+            onClick={onNext}
+            disabled={!answer}
+            className="min-h-12 rounded-full bg-[#fafafa] px-7 py-3 text-sm font-black tracking-wide text-[var(--theme)] shadow-[0_8px_20px_rgba(43,43,43,0.2)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-not-allowed disabled:opacity-35"
+          >
             {index === questions.length - 1 ? text.meetMatch : `${text.next} →`}
-          </PrimaryButton>
+          </button>
         </div>
       </div>
-      <BottomNav onHome={onHome} text={text} />
+
+      <footer className="grid h-[clamp(4.5rem,10dvh,5.5rem)] shrink-0 place-items-center text-white" style={{ backgroundColor: section.headerColor || "#66883e" }}>
+        <button
+          type="button"
+          onClick={onHome}
+          className="grid h-14 w-14 place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          aria-label={text.home}
+        >
+          <img src="/assets/pslogowhite.png" alt="" aria-hidden="true" className="h-11 w-11 object-contain" />
+        </button>
+      </footer>
     </Shell>
   );
 }
@@ -745,7 +848,7 @@ export default function Home() {
     return (
       <Shell language={language}>
         <div className="grid flex-1 place-items-center text-[#66883e]">
-          <div className="animate-pulse"><BrandMark /></div>
+          <BrandMark />
         </div>
       </Shell>
     );

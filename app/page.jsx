@@ -12,7 +12,72 @@ const baseTheme = {
   ink: "#2b2b2b",
 };
 
+export const optimizedAssets = {
+  logo: "/assets/optimized/logo.webp",
+  wordmark: "/assets/optimized/wordmark.webp",
+  whiteLogo: "/assets/optimized/white-logo.webp",
+  keyholes: "/assets/optimized/keyholes.webp",
+  pattern: "/assets/optimized/pattern.webp",
+  cover: {
+    key: "/assets/optimized/cover-key.webp",
+    notebook: "/assets/optimized/cover-notebook.webp",
+    fortune: "/assets/optimized/cover-fortune.webp",
+    greenTicket: "/assets/optimized/cover-green-ticket.webp",
+    studentId: "/assets/optimized/cover-student-id.webp",
+    receipt: "/assets/optimized/cover-receipt.webp",
+    ticketStub: "/assets/optimized/cover-ticket-stub.webp",
+    boardingPass: "/assets/optimized/cover-boarding-pass.webp",
+    camera: "/assets/optimized/cover-camera.webp",
+    passport: "/assets/optimized/cover-passport.webp",
+  },
+};
+
+const coverPreloadSources = [
+  optimizedAssets.logo,
+  optimizedAssets.wordmark,
+  ...Object.values(optimizedAssets.cover),
+];
+
+export function getImageLoadingProps(priority = false) {
+  return {
+    loading: "eager",
+    decoding: "async",
+    fetchPriority: priority ? "high" : "auto",
+  };
+}
+
+function preloadImages(sources, priority = "auto") {
+  sources.forEach((src) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.fetchPriority = priority;
+    image.src = src;
+  });
+}
+
 const darkTextThemes = new Set(["#b5d627", "#ff582e", "#feb2bf"]);
+
+const resultPalettes = {
+  anita: {
+    accent: "#b5d627",
+    label: "#1a4c19",
+    accentText: "#1a4c19",
+    labelText: "#fafafa",
+    breakdownTrack: "rgba(26, 76, 25, 0.38)",
+  },
+  kimly: { accent: "#feb2bf", label: "#ff582e", accentText: "#2b2b2b", labelText: "#2b2b2b", breakdownTrack: "rgba(255, 88, 46, 0.34)" },
+  tohla: { accent: "#ff582e", label: "#c8320d", accentText: "#fafafa", labelText: "#fafafa", breakdownTrack: "rgba(200, 50, 13, 0.34)" },
+  vitou: { accent: "#febe14", label: "#f57a22", accentText: "#2b2b2b", labelText: "#2b2b2b", breakdownTrack: "rgba(245, 122, 34, 0.72)" },
+  mc: { accent: "#7889ea", label: "#4550a7", accentText: "#fafafa", labelText: "#fafafa", breakdownTrack: "rgba(69, 80, 167, 0.34)" },
+};
+
+const resultBarColors = {
+  anita: "#1a4c19",
+  mc: "#4550a7",
+  vitou: "#febe14",
+  tohla: "#c8320d",
+  kimly: "#feb2bf",
+};
 
 function getThemeContrast(theme) {
   return theme.contrast || (darkTextThemes.has(theme.color.toLowerCase()) ? "#2b2b2b" : "#fafafa");
@@ -30,7 +95,7 @@ function BrandMark({ compact = false }) {
     return (
       <span className="brand-wordmark" aria-label="Pteah Silapak">
         <img
-          src="/assets/pteah-silapak-wordmark.png"
+          src={optimizedAssets.wordmark}
           alt=""
           className="h-full w-full object-cover object-center"
         />
@@ -40,7 +105,7 @@ function BrandMark({ compact = false }) {
 
   return (
     <img
-      src="/assets/pteah-silapak-logo.png"
+      src={optimizedAssets.logo}
       alt="Pteah Silapak"
       className="brand-logo"
     />
@@ -90,8 +155,10 @@ function PatternBand({ color, accent, className = "", exactColors = false }) {
         <span className="motif-mask pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" />
       ) : (
         <img
-          src="/assets/pteah-silapak-pattern.png"
+          src={optimizedAssets.pattern}
           alt=""
+          loading="eager"
+          decoding="async"
           className="motif-art pointer-events-none absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
         />
       )}
@@ -112,7 +179,17 @@ function ProgressDots({ active, total = 3 }) {
   );
 }
 
-function Shell({ children, theme = baseTheme, patterned = false, scroll = false, language = "en" }) {
+function Shell({
+  children,
+  theme = baseTheme,
+  patterned = false,
+  patternClassName = "",
+  patternColor,
+  patternAccent,
+  patternExactColors = false,
+  scroll = false,
+  language = "en",
+}) {
   return (
     <main className="min-h-[100dvh] bg-[#2b2b2b] sm:grid sm:place-items-center sm:p-6">
       <div
@@ -127,7 +204,14 @@ function Shell({ children, theme = baseTheme, patterned = false, scroll = false,
           "--contrast": getThemeContrast(theme),
         }}
       >
-        {patterned && <PatternBand color={theme.color} accent={theme.accent} />}
+        {patterned && (
+          <PatternBand
+            color={patternColor || theme.color}
+            accent={patternAccent || theme.accent}
+            exactColors={patternExactColors}
+            className={patternClassName}
+          />
+        )}
         {children}
       </div>
     </main>
@@ -185,6 +269,31 @@ function PrimaryButton({ children, onClick, disabled = false, light = false }) {
 }
 
 function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, language }) {
+  useEffect(() => {
+    preloadImages([optimizedAssets.logo, optimizedAssets.wordmark, optimizedAssets.cover.key], "high");
+
+    const preloadDecorations = () => {
+      preloadImages(coverPreloadSources.filter((src) => ![optimizedAssets.logo, optimizedAssets.wordmark, optimizedAssets.cover.key].includes(src)));
+    };
+
+    let scheduleId;
+    let usingIdleCallback = false;
+    if ("requestIdleCallback" in window) {
+      usingIdleCallback = true;
+      scheduleId = window.requestIdleCallback(preloadDecorations, { timeout: 700 });
+    } else {
+      scheduleId = window.setTimeout(preloadDecorations, 150);
+    }
+
+    return () => {
+      if (usingIdleCallback && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(scheduleId);
+      } else {
+        window.clearTimeout(scheduleId);
+      }
+    };
+  }, []);
+
   return (
     <Shell language={language}>
       <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 text-[#66883e]">
@@ -222,14 +331,13 @@ function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, lan
   );
 }
 
-function CoverAsset({ filename, variant, className, imageClassName = "" }) {
+function CoverAsset({ src, variant, className, imageClassName = "", priority = false }) {
   return (
     <div className={`cover-asset cover-asset--${variant} ${className}`} aria-hidden="true">
       <img
-        src={`/assets/${filename}`}
+        src={src}
         alt=""
-        loading="eager"
-        decoding="sync"
+        {...getImageLoadingProps(priority)}
         className={`absolute inset-0 h-full w-full object-contain ${imageClassName}`}
       />
     </div>
@@ -247,7 +355,7 @@ function Cover({ text, language, onEnter, onBack }) {
           className="grid h-14 w-28 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           <img
-            src="/assets/pteah-silapak-wordmark.png"
+            src={optimizedAssets.wordmark}
             alt="Pteah Silapak"
             className="cover-header-wordmark"
           />
@@ -265,39 +373,40 @@ function Cover({ text, language, onEnter, onBack }) {
         </div>
 
         <CoverAsset
-          filename="KeyCharacter_essential.png"
+          src={optimizedAssets.cover.key}
           variant="key"
           label="Key"
           className="left-1/2 top-[184px] z-10 h-[280px] w-[190px] -translate-x-1/2"
           imageClassName="rotate-90 scale-[1.65]"
+          priority
         />
 
-        <CoverAsset filename="Character_essential-09.png" variant="notebook" label="A N I T A" className="left-1 top-[190px] h-[132px] w-[105px] rotate-[12deg]"
+        <CoverAsset src={optimizedAssets.cover.notebook} variant="notebook" label="A N I T A" className="left-1 top-[190px] h-[132px] w-[105px] rotate-[12deg]"
         imageClassName="scale-[1.4]" />
 
-        <CoverAsset filename="VitouItemCharacter_essential.png" variant="fortune" label="FORTUNE" className="-right-4 top-[188px] h-[90px] w-[108px] rotate-[50deg]"
+        <CoverAsset src={optimizedAssets.cover.fortune} variant="fortune" label="FORTUNE" className="-right-4 top-[188px] h-[90px] w-[108px] rotate-[50deg]"
         imageClassName="scale-[1.65]" />
 
-        <CoverAsset filename="2Character_essential-08.png" variant="green-ticket" label="ANITA" className="-left-4 top-[364px] h-[64px] w-[118px] rotate-[280deg]"
+        <CoverAsset src={optimizedAssets.cover.greenTicket} variant="green-ticket" label="ANITA" className="-left-4 top-[364px] h-[64px] w-[118px] rotate-[280deg]"
         imageClassName="scale-[1.65]" />
 
-        <CoverAsset filename="Character_essential-07.png" variant="student-id" label="STUDENT ID" className="-right-2 top-[325px] h-[122px] w-[102px] rotate-[289deg]" imageClassName="rotate-90 scale-[1.4]" 
+        <CoverAsset src={optimizedAssets.cover.studentId} variant="student-id" label="STUDENT ID" className="-right-2 top-[325px] h-[122px] w-[102px] rotate-[289deg]" imageClassName="rotate-90 scale-[1.4]" 
          />
 
-        <CoverAsset filename="Character_essential-10.png" variant="receipt" label="LUCKY STORE" className="-left-0.2 top-[433px] h-[122px] w-[98px] rotate-[26deg]"
+        <CoverAsset src={optimizedAssets.cover.receipt} variant="receipt" label="LUCKY STORE" className="-left-0.2 top-[433px] h-[122px] w-[98px] rotate-[26deg]"
         imageClassName="scale-[1.2]"
          />
 
-        <CoverAsset filename="2Character_essential-07.png" variant="ticket-stub" label="A13" className="-right-5 top-115 h-[70px] w-[128px] -rotate-[106deg]" imageClassName="scale-[1.9]" />
+        <CoverAsset src={optimizedAssets.cover.ticketStub} variant="ticket-stub" label="A13" className="-right-5 top-115 h-[70px] w-[128px] -rotate-[106deg]" imageClassName="scale-[1.9]" />
 
-        <CoverAsset filename="2Character_essential-09.png" variant="boarding-pass" label="TICKET" className="-left-5 top-[545px] h-[116px] w-[116px] -rotate-[49deg]"
+        <CoverAsset src={optimizedAssets.cover.boardingPass} variant="boarding-pass" label="TICKET" className="-left-5 top-[545px] h-[116px] w-[116px] -rotate-[49deg]"
         imageClassName="scale-[1.2]"
         />
 
-        <CoverAsset filename="2Character_essential-06.png" variant="camera" label="●" className="-bottom-5 -left-2 h-[92px] w-[122px] -rotate-[102deg]"
+        <CoverAsset src={optimizedAssets.cover.camera} variant="camera" label="●" className="-bottom-5 -left-2 h-[92px] w-[122px] -rotate-[102deg]"
         imageClassName="scale-[1.4]" />
 
-        <CoverAsset filename="Character_essential-06.png" variant="passport" label="HOUSE OF CREATIVE" className="-bottom-3 -right-2 h-[146px] w-[112px] -rotate-[12deg]" />
+        <CoverAsset src={optimizedAssets.cover.passport} variant="passport" label="HOUSE OF CREATIVE" className="-bottom-3 -right-2 h-[146px] w-[112px] -rotate-[12deg]" />
 
         <button
           type="button"
@@ -323,7 +432,7 @@ function Story({ text, language, onNext, onBack, onHome }) {
           className="grid h-14 w-32 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           <img
-            src="/assets/pteah-silapak-wordmark.png"
+            src={optimizedAssets.wordmark}
             alt="Pteah Silapak"
             className="cover-header-wordmark"
           />
@@ -338,7 +447,7 @@ function Story({ text, language, onNext, onBack, onHome }) {
               {text.story}
             </p>
             <img
-              src="/assets/pslogowhite.png"
+              src={optimizedAssets.whiteLogo}
               alt=""
               aria-hidden="true"
               className="my-2 h-7 w-8 object-contain"
@@ -350,7 +459,7 @@ function Story({ text, language, onNext, onBack, onHome }) {
 
           <div className="grid h-10 place-items-center border-t-2 border-[#2b2b2b] bg-white">
             <img
-              src="/assets/keyholes.png"
+              src={optimizedAssets.keyholes}
               alt=""
               aria-hidden="true"
               className="h-7 w-6 object-contain"
@@ -382,7 +491,7 @@ function Instructions({ text, language, onBegin, onBack, onHome }) {
           className="grid h-14 w-32 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
           <img
-            src="/assets/pteah-silapak-wordmark.png"
+            src={optimizedAssets.wordmark}
             alt="Pteah Silapak"
             className="cover-header-wordmark"
           />
@@ -416,11 +525,10 @@ function Instructions({ text, language, onBegin, onBack, onHome }) {
               aria-label={text.begin}
             >
               <img
-                src="/assets/KeyCharacter_essential.png"
+                src={optimizedAssets.cover.key}
                 alt=""
                 aria-hidden="true"
-                loading="eager"
-                decoding="sync"
+                {...getImageLoadingProps(true)}
                 className="absolute inset-0 h-full w-full scale-[1.24] object-contain drop-shadow-[0_5px_2px_rgba(43,43,43,0.22)]"
               />
             </button>
@@ -457,7 +565,7 @@ function SectionIntro({ section, text, language, onContinue, onBack, onHome }) {
             className="grid h-12 w-28 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <img
-              src="/assets/pteah-silapak-wordmark.png"
+            src={optimizedAssets.wordmark}
               alt="Pteah Silapak"
               className="cover-header-wordmark h-10 w-24"
             />
@@ -505,6 +613,8 @@ function SectionIntro({ section, text, language, onContinue, onBack, onHome }) {
 function QuestionScreen({ question, index, section, answer, text, language, onAnswer, onNext, onBack, onHome }) {
   const sectionPosition = index - section.start + 1;
   const sectionTotal = section.end - section.start + 1;
+  const isBlueSection = section.id === "belonging";
+  const progressPercent = Math.min(100, Math.max(0, ((index + 1) / questions.length) * 100));
 
   return (
     <Shell theme={section} language={language}>
@@ -515,21 +625,31 @@ function QuestionScreen({ question, index, section, answer, text, language, onAn
           <span>{sectionPosition}/{sectionTotal} {text.inSection}</span>
           <span>{index + 1}/15</span>
         </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/25" aria-hidden="true">
-          <div className="h-full rounded-full bg-[var(--accent)] transition-all duration-300" style={{ width: `${((index + 1) / questions.length) * 100}%` }} />
+        <div
+          className="mt-2 h-1.5 overflow-hidden rounded-full"
+          style={{ backgroundColor: isBlueSection ? "rgba(26, 30, 70, 0.46)" : "rgba(250, 250, 250, 0.25)" }}
+          aria-hidden="true"
+        >
+          <div
+            className="h-full rounded-full transition-all duration-300"
+            style={{
+              width: `${progressPercent}%`,
+              backgroundColor: isBlueSection ? "#7889EA" : "var(--accent)",
+            }}
+          />
         </div>
 
-        <fieldset className="mt-5 flex min-h-0 flex-1 flex-col">
+        <fieldset className="mt-3 flex min-h-0 flex-1 flex-col">
           <legend className={`${language === "km" ? "text-[1.15rem] leading-[1.65]" : "text-[1.55rem] leading-[1.08]"} mx-auto block max-w-[370px] px-2 text-center font-black tracking-tight`}>
             {localize(question.prompt, language)}
           </legend>
-          <div className="mt-[clamp(1.75rem,5dvh,3.5rem)] flex flex-1 flex-col items-center gap-[clamp(0.75rem,2.5dvh,2rem)]">
+          <div className="mt-[clamp(0.5rem,2dvh,1.25rem)] flex flex-col items-center gap-[clamp(0.5rem,1.8dvh,1rem)] pb-2">
             {question.options.map((option, optionIndex) => {
               const selected = answer === option.id;
               return (
                 <label
                   key={option.id}
-                  className={`group flex min-h-[54px] w-fit cursor-pointer items-center gap-2 rounded-md px-3 py-3 text-base font-medium leading-snug focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-white ${language === "km" ? "min-w-[240px] max-w-[94%]" : "min-w-[180px] max-w-[88%]"} ${
+                  className={`group flex min-h-[54px] w-fit cursor-pointer items-start gap-2 rounded-md px-3 py-3 text-left text-base font-medium leading-snug focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-white ${language === "km" ? "min-w-[240px] max-w-[94%]" : "min-w-[180px] max-w-[88%]"} ${
                     selected
                       ? "bg-[var(--accent)] text-[var(--accent-contrast)] shadow-[0_4px_0_rgba(43,43,43,0.18)]"
                       : "bg-[#fafafa] text-[#2b2b2b]"
@@ -546,8 +666,7 @@ function QuestionScreen({ question, index, section, answer, text, language, onAn
                   <span className="shrink-0 font-medium">
                     {String.fromCharCode(65 + optionIndex)}.
                   </span>
-                  <span className={language === "km" ? "leading-6" : ""}>{localize(option.text, language)}</span>
-                  {selected && <span className="ml-auto text-xs" aria-label={text.selected}>✓</span>}
+                  <span className={`break-words ${language === "km" ? "leading-6" : ""}`}>{localize(option.text, language)}</span>
                 </label>
               );
             })}
@@ -576,7 +695,7 @@ function QuestionScreen({ question, index, section, answer, text, language, onAn
           className="grid h-14 w-14 place-items-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           aria-label={text.home}
         >
-          <img src="/assets/pslogowhite.png" alt="" aria-hidden="true" className="h-11 w-11 object-contain" />
+          <img src={optimizedAssets.whiteLogo} alt="" aria-hidden="true" className="h-11 w-11 object-contain" loading="eager" decoding="async" />
         </button>
       </footer>
     </Shell>
@@ -587,93 +706,141 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
   const topMatch = ranking?.[0];
   const secondMatch = ranking?.[1];
   const runnerUp = secondMatch ? characters[secondMatch.characterId] : null;
+  const palette = resultPalettes[winner.id] || resultPalettes.anita;
+  const resultTheme = {
+    ...baseTheme,
+    color: palette.accent,
+    accent: palette.accent,
+    soft: "#fafafa",
+    ink: "#2b2b2b",
+    contrast: "#fafafa",
+  };
+  const resultAccentText = palette.accentText;
+  const resultLabelColor = palette.label;
+  const resultLabelText = palette.labelText;
+  const breakdownTrack = palette.breakdownTrack || `${resultLabelColor}45`;
 
   return (
-    <Shell theme={{ ...baseTheme, color: winner.color }} patterned scroll language={language}>
-      <TopBrand onHome={onHome} theme={{ ...baseTheme, color: winner.color }} text={text} />
-      <div className="flex flex-col items-center px-6 pb-10 pt-8 text-center">
+    <Shell
+      theme={resultTheme}
+      patterned
+      patternColor={baseTheme.accent}
+      patternAccent={baseTheme.color}
+      patternExactColors
+      patternClassName="h-[clamp(5rem,12dvh,6rem)] rounded-b-[2.5rem]"
+      scroll
+      language={language}
+    >
+      <div className="flex flex-col items-center px-6 pb-10 pt-8 text-center text-[#1a4c19]">
         <p className="text-[10px] font-black uppercase tracking-[0.25em] opacity-55">{text.resultEyebrow}</p>
-        <h1 className={`${language === "km" ? "text-4xl leading-relaxed" : "text-5xl"} mt-2 font-black tracking-tight`} style={{ color: winner.color }}>{localize(winner.name, language)}</h1>
-        <p className={`${language === "km" ? "leading-7" : "uppercase tracking-[0.12em]"} mt-1 text-sm font-black opacity-55`}>{localize(winner.archetype, language)}</p>
+        <h1 className={`${language === "km" ? "text-4xl leading-relaxed" : "text-5xl"} mt-2 font-black tracking-tight`} style={{ color: resultTheme.accent }}>{localize(winner.name, language)}</h1>
+        <p className={`${language === "km" ? "leading-7" : "uppercase tracking-[0.12em]"} mt-1 text-sm font-black opacity-80`}>{localize(winner.archetype, language)}</p>
         {topMatch && (
           <div
             className="mt-4 rounded-full px-5 py-2 text-lg font-black shadow-sm"
-            style={{ backgroundColor: winner.color, color: getThemeContrast({ color: winner.color }) }}
+            style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}
           >
             {topMatch.percentage.toFixed(1)}% {text.match}
           </div>
         )}
 
-        <div className="my-7">
-          <div
-            className="relative grid h-44 w-44 place-items-center overflow-hidden rounded-[2.8rem] border-4 bg-white shadow-[0_18px_45px_rgba(26,76,25,0.16)]"
-            style={{ borderColor: winner.color, color: winner.color }}
-            aria-label={`${localize(winner.name, language)} portrait`}
-          >
-            <span className="absolute -right-7 -top-7 h-24 w-24 rounded-full bg-current opacity-15" />
-            <span className="absolute -bottom-10 -left-5 h-32 w-32 rotate-12 rounded-[2.5rem] bg-current opacity-10" />
-            <span className="relative text-7xl font-black">{winner.mark}</span>
-            <span className="absolute bottom-3 text-[9px] font-black uppercase tracking-[0.18em]">portrait later</span>
-          </div>
+        <div
+          className="relative my-7 flex h-[26rem] w-full items-center justify-center"
+          style={{ color: resultTheme.accent }}
+          aria-label={`${localize(winner.name, language)} portrait`}
+        >
+          <span
+            className="pointer-events-none absolute h-72 w-56 rotate-[-8deg] rounded-[48%_52%_46%_54%] opacity-25"
+            style={{ backgroundColor: resultTheme.accent }}
+            aria-hidden="true"
+          />
+          {winner.image ? (
+            <img
+              src={winner.image}
+              alt={localize(winner.name, language)}
+              loading="eager"
+              decoding="async"
+              className={`relative z-10 h-full w-auto max-w-[92%] object-contain ${winner.id === "tohla" ? "scale-[1.2]" : "scale-[1.25]"}`}
+            />
+          ) : (
+            <span className="text-8xl font-black">{winner.mark}</span>
+          )}
         </div>
 
-        <p className={`${language === "km" ? "leading-9" : "leading-tight"} max-w-sm text-xl font-black`}>{localize(winner.summary, language)}</p>
+        <p className={`${language === "km" ? "leading-9" : "leading-tight"} max-w-sm text-xl font-black text-[#1a4c19]`}>{localize(winner.summary, language)}</p>
 
         {runnerUp && (
-          <div className="mt-8 flex w-full items-center gap-4 rounded-2xl border-2 border-black/8 bg-white p-4 text-left shadow-sm">
+          <div
+            className="mt-8 flex w-full items-center gap-4 rounded-none border-2 border-[#0b210b] p-4 text-left shadow-sm"
+            style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}
+          >
             <div
-              className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl text-2xl font-black"
-              style={{ backgroundColor: runnerUp.color, color: getThemeContrast({ color: runnerUp.color }) }}
+              className="grid h-14 w-14 shrink-0 place-items-center rounded-none bg-[#1a4c19] text-2xl font-black text-[#fafafa]"
               aria-hidden="true"
             >
-              {runnerUp.mark}
+              {runnerUp.image ? (
+                <img
+                  src={runnerUp.image}
+                  alt=""
+                  aria-hidden="true"
+                  loading="lazy"
+                  className="h-12 w-12 object-contain"
+                />
+              ) : runnerUp.mark}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-black/40">{text.secondMatch}</p>
-              <p className="mt-1 text-lg font-black" style={{ color: runnerUp.color }}>{localize(runnerUp.name, language)}</p>
-              <p className={`${language === "km" ? "leading-5" : ""} text-xs font-bold text-black/45`}>{localize(runnerUp.archetype, language)}</p>
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-65">{text.secondMatch}</p>
+              <p className="mt-1 text-lg font-black">{localize(runnerUp.name, language)}</p>
+              <p className={`${language === "km" ? "leading-5" : ""} text-xs font-bold opacity-70`}>{localize(runnerUp.archetype, language)}</p>
             </div>
-            <span className="text-lg font-black" style={{ color: runnerUp.color }}>
+            <span className="text-lg font-black">
               {secondMatch.percentage.toFixed(1)}%
             </span>
           </div>
         )}
 
-        <h2 className="mt-8 w-full text-left text-sm font-black uppercase tracking-[0.14em]">{text.moreInfo}</h2>
+        <h2 className="mt-8 w-full text-left text-sm font-black uppercase tracking-[0.14em] text-[#1a4c19]">{text.moreInfo}</h2>
         <div className="mt-3 grid w-full gap-3 text-left">
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>{text.strength}</p>
-            <p className="mt-2 text-sm font-semibold leading-relaxed text-black/65">{localize(winner.strength, language)}</p>
+          <div className="grid grid-cols-[6.5rem_1fr] overflow-hidden border-2 border-[#0b210b] shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>
+            <p className="flex items-center px-3 py-4 text-[10px] font-black uppercase tracking-[0.12em]" style={{ backgroundColor: resultLabelColor, color: resultLabelText }}>{text.strength}</p>
+            <p className="p-4 text-sm font-semibold leading-relaxed">{localize(winner.strength, language)}</p>
           </div>
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>{text.challenge}</p>
-            <p className="mt-2 text-sm font-semibold leading-relaxed text-black/65">{localize(winner.challenge, language)}</p>
+          <div className="grid grid-cols-[6.5rem_1fr] overflow-hidden border-2 border-[#0b210b] shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>
+            <p className="flex items-center px-3 py-4 text-[10px] font-black uppercase tracking-[0.12em]" style={{ backgroundColor: resultLabelColor, color: resultLabelText }}>{text.challenge}</p>
+            <p className="p-4 text-sm font-semibold leading-relaxed">{localize(winner.challenge, language)}</p>
           </div>
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>{text.hiddenFear}</p>
-            <p className="mt-2 text-sm font-semibold leading-relaxed text-black/65">{localize(winner.hiddenFear, language)}</p>
+          <div className="grid grid-cols-[6.5rem_1fr] overflow-hidden border-2 border-[#0b210b] shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>
+            <p className="flex items-center px-3 py-4 text-[10px] font-black uppercase tracking-[0.12em]" style={{ backgroundColor: resultLabelColor, color: resultLabelText }}>{text.hiddenFear}</p>
+            <p className="p-4 text-sm font-semibold leading-relaxed">{localize(winner.hiddenFear, language)}</p>
           </div>
-          <div className="rounded-2xl bg-white p-5 shadow-sm">
-            <p className="text-[10px] font-black uppercase tracking-[0.18em]" style={{ color: winner.color }}>{text.traits}</p>
-            <p className="mt-2 text-sm font-semibold leading-relaxed text-black/65">{localize(winner.traits, language)}</p>
+          <div className="overflow-hidden border-2 border-[#0b210b] shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>
+            <p className="px-3 py-3 text-[10px] font-black uppercase tracking-[0.18em]" style={{ backgroundColor: resultLabelColor, color: resultLabelText }}>{text.traits}</p>
+            <p className="p-4 text-sm font-semibold leading-relaxed">{localize(winner.traits, language)}</p>
           </div>
         </div>
 
         {ranking && !shared && (
-          <div className="mt-8 w-full rounded-2xl bg-white p-5 text-left shadow-sm">
-            <h2 className="text-sm font-black uppercase tracking-[0.14em]">{text.fullBreakdown}</h2>
+          <div
+            className="mt-8 w-full rounded-none border-[3px] border-[#1a1a1a] p-5 text-left shadow-sm"
+            style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}
+          >
+            <h2 className="text-base font-black uppercase tracking-[0.16em]">{text.fullBreakdown}</h2>
             <div className="mt-4 grid gap-3">
               {ranking.map((match) => (
-                <div key={match.characterId} className="grid grid-cols-[18px_62px_1fr_48px] items-center gap-2 text-xs font-bold">
-                  <span className="text-black/35">{match.rank}</span>
+                <div key={match.characterId} className="grid grid-cols-[18px_62px_1fr_48px] items-center gap-2 text-sm font-bold">
+                  <span style={{ color: resultAccentText, opacity: 0.85 }}>{match.rank}</span>
                   <span>{localize(characters[match.characterId].name, language)}</span>
-                  <div className="h-2 overflow-hidden rounded-full bg-black/8">
+                  <div className="h-3 overflow-hidden rounded-full" style={{ backgroundColor: breakdownTrack }}>
                     <div
                       className="h-full rounded-full"
-                      style={{ width: `${match.percentage}%`, backgroundColor: characters[match.characterId].color }}
+                      style={{
+                        width: `${match.percentage}%`,
+                        minWidth: match.percentage > 0 ? "0.65rem" : "0",
+                        backgroundColor: resultBarColors[match.characterId] || characters[match.characterId].color,
+                      }}
                     />
                   </div>
-                  <span className="text-right text-black/45">{match.percentage.toFixed(1)}%</span>
+                  <span className="text-right" style={{ color: resultAccentText, opacity: 0.95 }}>{match.percentage.toFixed(1)}%</span>
                 </div>
               ))}
             </div>
@@ -681,16 +848,16 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
         )}
 
         {shared && (
-          <p className="mt-7 rounded-full bg-white px-5 py-2 text-xs font-bold text-black/50 shadow-sm">{text.sharedResult}</p>
+          <p className="mt-7 rounded-full px-5 py-2 text-xs font-bold shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>{text.sharedResult}</p>
         )}
 
         <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
           <PrimaryButton onClick={onShare}>{copied ? text.copied : text.share}</PrimaryButton>
-          <button type="button" onClick={onRetake} className="min-h-12 rounded-full border-2 border-black/15 bg-white px-5 text-sm font-black transition hover:border-black/30">
+          <button type="button" onClick={onRetake} className="min-h-12 rounded-full border-2 border-[#1a4c19]/25 bg-white px-5 text-sm font-black text-[#1a4c19] transition hover:border-[#1a4c19]/50">
             {text.retake}
           </button>
         </div>
-        <button type="button" onClick={onHome} className="mt-5 text-xs font-black text-black/45 underline underline-offset-4">{text.backHome}</button>
+        <button type="button" onClick={onHome} className="mt-5 text-xs font-black text-[#66883e] underline underline-offset-4">{text.backHome}</button>
       </div>
     </Shell>
   );

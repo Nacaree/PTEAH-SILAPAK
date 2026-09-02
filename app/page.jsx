@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { copy, languages } from "./data/content";
 import { characters, questions, sections } from "./data/quizData";
-import { getRankedResults, getWinner, isQuizComplete } from "./lib/scoring";
+import { getPreviewRanking, getRankedResults, getWinner, isQuizComplete } from "./lib/scoring";
 import { getShareUrl } from "./lib/sharing";
 
 const STORAGE_KEY = "pteah-silapak-quiz-v2";
@@ -71,12 +71,21 @@ const resultPalettes = {
   mc: { accent: "#7889ea", label: "#4550a7", accentText: "#fafafa", labelText: "#fafafa", breakdownTrack: "rgba(69, 80, 167, 0.34)" },
 };
 
+const runnerUpInnerBackgrounds = {
+  anita: baseTheme.color,
+  kimly: "#c94f70",
+  tohla: resultPalettes.tohla.accent,
+  vitou: resultPalettes.vitou.accent,
+  mc: resultPalettes.mc.accent,
+};
+
 const resultBarColors = {
   anita: "#1a4c19",
   mc: "#4550a7",
-  vitou: "#febe14",
+  vitou: "#d99f16",
   tohla: "#c8320d",
-  kimly: "#feb2bf",
+  // Match Kimly's red-orange Traits header for a clear accent on the pink panel.
+  kimly: "#ff582e",
 };
 
 function getThemeContrast(theme) {
@@ -175,6 +184,69 @@ function ProgressDots({ active, total = 3 }) {
           className={`h-1.5 rounded-full transition-all ${index === active ? "w-5 bg-current" : "w-1.5 bg-current opacity-25"}`}
         />
       ))}
+    </div>
+  );
+}
+
+export const SCREEN_TRANSITION_DURATION = 220;
+
+export function prefersReducedMotion() {
+  return typeof window !== "undefined"
+    && typeof window.matchMedia === "function"
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+export function ScreenTransition({ transitionKey, direction = "forward", children }) {
+  const previousKeyRef = useRef(transitionKey);
+  const previousNodeRef = useRef(children);
+  const timeoutRef = useRef(null);
+  const [outgoing, setOutgoing] = useState(null);
+
+  useLayoutEffect(() => {
+    if (previousKeyRef.current !== transitionKey) {
+      const outgoingNode = previousNodeRef.current;
+      const outgoingKey = previousKeyRef.current;
+
+      if (prefersReducedMotion()) {
+        previousKeyRef.current = transitionKey;
+        previousNodeRef.current = children;
+        setOutgoing(null);
+        return;
+      }
+
+      setOutgoing({ key: outgoingKey, node: outgoingNode, direction });
+      previousKeyRef.current = transitionKey;
+      previousNodeRef.current = children;
+
+      window.clearTimeout(timeoutRef.current);
+      timeoutRef.current = window.setTimeout(() => {
+        setOutgoing(null);
+      }, SCREEN_TRANSITION_DURATION);
+      return;
+    }
+
+    previousNodeRef.current = children;
+  }, [children, direction, transitionKey]);
+
+  useEffect(() => () => window.clearTimeout(timeoutRef.current), []);
+
+  return (
+    <div className="screen-transition-host" data-transitioning={Boolean(outgoing)}>
+      {outgoing && (
+        <div
+          key={`outgoing-${outgoing.key}`}
+          className={`screen-transition-layer screen-transition-layer--outgoing screen-transition-layer--exiting-${outgoing.direction}`}
+          aria-hidden="true"
+        >
+          {outgoing.node}
+        </div>
+      )}
+      <div
+        key={`current-${transitionKey}`}
+        className={`screen-transition-layer screen-transition-layer--current ${outgoing ? `screen-transition-layer--entering-${direction} screen-transition-layer--locked` : ""}`}
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -775,7 +847,8 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
             style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}
           >
             <div
-              className="grid h-14 w-14 shrink-0 place-items-center rounded-none bg-[#1a4c19] text-2xl font-black text-[#fafafa]"
+              className="grid h-14 w-14 shrink-0 place-items-center rounded-none text-2xl font-black text-[#fafafa]"
+              style={{ backgroundColor: runnerUpInnerBackgrounds[runnerUp.id] || baseTheme.color }}
               aria-hidden="true"
             >
               {runnerUp.image ? (
@@ -876,16 +949,38 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [sharedResultId, setSharedResultId] = useState(null);
+  const [previewCharacterId, setPreviewCharacterId] = useState(null);
+  const [previewRunnerUpId, setPreviewRunnerUpId] = useState(null);
 
   const text = copy[language] && Object.keys(copy[language]).length ? copy[language] : copy.en;
   const currentQuestion = questions[currentIndex];
   const currentSection = getSection(currentIndex);
   const complete = isQuizComplete(answers);
   const ranking = useMemo(() => getRankedResults(answers), [answers]);
-  const resultId = sharedResultId || ranking[0].characterId;
+  const previewRanking = useMemo(
+    () => (previewCharacterId ? getPreviewRanking(previewCharacterId, questions, previewRunnerUpId) : null),
+    [previewCharacterId, previewRunnerUpId],
+  );
+  const resultId = previewCharacterId || sharedResultId || ranking[0].characterId;
+  const [transitionDirection, setTransitionDirection] = useState("forward");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    if (import.meta.env.DEV) {
+      const previewId = params.get("preview");
+      if (previewId && characters[previewId]) {
+        const requestedRunnerUpId = params.get("runnerup") || params.get("runnerUp");
+        const runnerUpId = requestedRunnerUpId && requestedRunnerUpId !== previewId && characters[requestedRunnerUpId]
+          ? requestedRunnerUpId
+          : null;
+        setPreviewCharacterId(previewId);
+        setPreviewRunnerUpId(runnerUpId);
+        setScreen("result");
+        setHydrated(true);
+        return;
+      }
+    }
+
     const sharedId = params.get("result");
     if (sharedId && characters[sharedId]) {
       setSharedResultId(sharedId);
@@ -913,12 +1008,17 @@ export default function Home() {
   }, [language]);
 
   useEffect(() => {
-    if (!hydrated || sharedResultId) return;
+    if (!hydrated || sharedResultId || previewCharacterId) return;
     window.localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({ language, answers, currentIndex, screen }),
     );
-  }, [answers, currentIndex, hydrated, language, screen, sharedResultId]);
+  }, [answers, currentIndex, hydrated, language, previewCharacterId, screen, sharedResultId]);
+
+  function navigate(nextScreen, direction = "forward") {
+    setTransitionDirection(direction);
+    setScreen(nextScreen);
+  }
 
   function selectLanguage(id) {
     if (!languages[id].available) {
@@ -927,7 +1027,7 @@ export default function Home() {
     }
     setLanguage(id);
     setNotice("");
-    setScreen("cover");
+    navigate("cover", "forward");
   }
 
   function chooseAnswer(questionId, optionId) {
@@ -936,14 +1036,14 @@ export default function Home() {
 
   function beginQuiz() {
     setCurrentIndex(0);
-    setScreen("section");
+    navigate("section", "forward");
   }
 
   function nextQuestion() {
     if (!answers[currentQuestion.id]) return;
     if (currentIndex === questions.length - 1) {
       if (complete) {
-        setScreen("result");
+        navigate("result", "forward");
         const finalResult = getWinner(answers);
         window.history.replaceState({}, "", `${window.location.pathname}?result=${finalResult.winnerId}`);
       }
@@ -953,51 +1053,56 @@ export default function Home() {
     const nextIndex = currentIndex + 1;
     const nextSection = getSection(nextIndex);
     setCurrentIndex(nextIndex);
-    setScreen(nextSection.id !== currentSection.id ? "section" : "question");
+    navigate(nextSection.id !== currentSection.id ? "section" : "question", "forward");
   }
 
   function previousQuestion() {
     if (currentIndex === currentSection.start) {
-      setScreen("section");
+      navigate("section", "back");
       return;
     }
     setCurrentIndex((index) => Math.max(0, index - 1));
+    navigate("question", "back");
   }
 
   function backFromSection() {
     if (currentSection.number === 1) {
-      setScreen("instructions");
+      navigate("instructions", "back");
       return;
     }
     setCurrentIndex(currentSection.start - 1);
-    setScreen("question");
+    navigate("question", "back");
   }
 
   function goHome() {
     setSharedResultId(null);
+    setPreviewCharacterId(null);
+    setPreviewRunnerUpId(null);
     window.history.replaceState({}, "", window.location.pathname);
-    setScreen("landing");
+    navigate("landing", "back");
   }
 
-  function resetQuiz(destination = "cover") {
+  function resetQuiz(destination = "cover", direction = "forward") {
     setAnswers({});
     setCurrentIndex(0);
     setSharedResultId(null);
+    setPreviewCharacterId(null);
+    setPreviewRunnerUpId(null);
     setCopied(false);
     window.localStorage.removeItem(STORAGE_KEY);
     window.history.replaceState({}, "", window.location.pathname);
-    setScreen(destination);
+    navigate(destination, direction);
   }
 
   function resumeQuiz() {
     if (complete) {
-      setScreen("result");
+      navigate("result", "forward");
       return;
     }
     const firstUnanswered = questions.findIndex((question) => !answers[question.id]);
     const resumeIndex = firstUnanswered >= 0 ? firstUnanswered : currentIndex;
     setCurrentIndex(resumeIndex);
-    setScreen("question");
+    navigate("question", "forward");
   }
 
   async function shareResult() {
@@ -1021,12 +1126,24 @@ export default function Home() {
     );
   }
 
-  if (screen === "cover") return <Cover text={text} language={language} onEnter={() => setScreen("story")} onBack={goHome} />;
-  if (screen === "story") return <Story text={text} language={language} onNext={() => setScreen("instructions")} onBack={() => setScreen("cover")} onHome={goHome} />;
-  if (screen === "instructions") return <Instructions text={text} language={language} onBegin={beginQuiz} onBack={() => setScreen("story")} onHome={goHome} />;
-  if (screen === "section") return <SectionIntro section={currentSection} text={text} language={language} onContinue={() => setScreen("question")} onBack={backFromSection} onHome={goHome} />;
-  if (screen === "question") {
-    return (
+  const transitionKey = [
+    screen,
+    screen === "question" ? currentIndex : "",
+    screen === "section" ? currentSection.id : "",
+    screen === "result" ? resultId : "",
+  ].join(":");
+
+  let screenContent;
+  if (screen === "cover") {
+    screenContent = <Cover text={text} language={language} onEnter={() => navigate("story", "forward")} onBack={goHome} />;
+  } else if (screen === "story") {
+    screenContent = <Story text={text} language={language} onNext={() => navigate("instructions", "forward")} onBack={() => navigate("cover", "back")} onHome={goHome} />;
+  } else if (screen === "instructions") {
+    screenContent = <Instructions text={text} language={language} onBegin={beginQuiz} onBack={() => navigate("story", "back")} onHome={goHome} />;
+  } else if (screen === "section") {
+    screenContent = <SectionIntro section={currentSection} text={text} language={language} onContinue={() => navigate("question", "forward")} onBack={backFromSection} onHome={goHome} />;
+  } else if (screen === "question") {
+    screenContent = (
       <QuestionScreen
         question={currentQuestion}
         index={currentIndex}
@@ -1040,32 +1157,37 @@ export default function Home() {
         onHome={goHome}
       />
     );
-  }
-  if (screen === "result") {
-    return (
+  } else if (screen === "result") {
+    screenContent = (
       <ResultScreen
         winner={characters[resultId]}
-        ranking={sharedResultId ? null : ranking}
+        ranking={previewCharacterId ? previewRanking : sharedResultId ? null : ranking}
         text={text}
         language={language}
-        onRetake={() => resetQuiz("cover")}
+        onRetake={() => resetQuiz("cover", "back")}
         onHome={goHome}
         onShare={shareResult}
         copied={copied}
         shared={Boolean(sharedResultId)}
       />
     );
+  } else {
+    screenContent = (
+      <Landing
+        onLanguage={selectLanguage}
+        notice={notice}
+        hasProgress={Object.keys(answers).length > 0}
+        onResume={resumeQuiz}
+        onReset={() => resetQuiz("cover", "forward")}
+        text={text}
+        language={language}
+      />
+    );
   }
 
   return (
-    <Landing
-      onLanguage={selectLanguage}
-      notice={notice}
-      hasProgress={Object.keys(answers).length > 0}
-      onResume={resumeQuiz}
-      onReset={() => resetQuiz("cover")}
-      text={text}
-      language={language}
-    />
+    <ScreenTransition transitionKey={transitionKey} direction={transitionDirection}>
+      {screenContent}
+    </ScreenTransition>
   );
 }

@@ -116,6 +116,94 @@ button:disabled {
   cursor: not-allowed;
 }
 
+.screen-transition-host {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.screen-transition-layer {
+  width: 100%;
+  min-height: 100dvh;
+}
+
+.screen-transition-layer--current {
+  position: relative;
+  z-index: 2;
+}
+
+.screen-transition-layer--outgoing {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.screen-transition-layer--locked {
+  pointer-events: none;
+}
+
+.screen-transition-layer--entering-forward {
+  animation: screen-slide-in-forward 220ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.screen-transition-layer--exiting-forward {
+  animation: screen-slide-out-forward 220ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.screen-transition-layer--entering-back {
+  animation: screen-slide-in-back 220ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.screen-transition-layer--exiting-back {
+  animation: screen-slide-out-back 220ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes screen-slide-in-forward {
+  from {
+    transform: translate3d(100%, 0, 0);
+    opacity: 0.94;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes screen-slide-out-forward {
+  from {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(-100%, 0, 0);
+    opacity: 0.94;
+  }
+}
+
+@keyframes screen-slide-in-back {
+  from {
+    transform: translate3d(-100%, 0, 0);
+    opacity: 0.94;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes screen-slide-out-back {
+  from {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+  to {
+    transform: translate3d(100%, 0, 0);
+    opacity: 0.94;
+  }
+}
+
 .brand-logo {
   display: block;
   width: min(21rem, calc(100vw - 2rem));
@@ -316,5 +404,12 @@ button:disabled {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+
+  .screen-transition-layer--entering-forward,
+  .screen-transition-layer--exiting-forward,
+  .screen-transition-layer--entering-back,
+  .screen-transition-layer--exiting-back {
+    animation: none !important;
   }
 }

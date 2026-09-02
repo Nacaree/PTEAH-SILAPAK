@@ -70,6 +70,34 @@ export function getWinner(answers, questionList = questions) {
   };
 }
 
+export function getPreviewAnswers(characterId, questionList = questions) {
+  return Object.fromEntries(
+    questionList.flatMap((question) => {
+      const option = question.options.find((item) => item.characterId === characterId);
+      return option ? [[question.id, option.id]] : [];
+    }),
+  );
+}
+
+export function getPreviewRanking(characterId, questionList = questions, runnerUpId = null) {
+  const ranking = getRankedResults(getPreviewAnswers(characterId, questionList), questionList);
+  if (!runnerUpId || runnerUpId === characterId || !characterIds.includes(runnerUpId)) {
+    return ranking;
+  }
+
+  const runnerUpIndex = ranking.findIndex((result) => result.characterId === runnerUpId);
+  if (runnerUpIndex < 1) return ranking;
+
+  const reordered = [
+    ranking[0],
+    ranking[runnerUpIndex],
+    ...ranking.slice(1, runnerUpIndex),
+    ...ranking.slice(runnerUpIndex + 1),
+  ];
+
+  return reordered.map((result, index) => ({ ...result, rank: index + 1 }));
+}
+
 export function isQuizComplete(answers, questionList = questions) {
   return questionList.every((question) => Boolean(answers[question.id]));
 }

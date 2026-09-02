@@ -39,6 +39,35 @@ const coverPreloadSources = [
   ...Object.values(optimizedAssets.cover),
 ];
 
+const pngPreloadSources = [
+  "/assets/2Character_essential-06.png",
+  "/assets/2Character_essential-07.png",
+  "/assets/2Character_essential-08.png",
+  "/assets/2Character_essential-09.png",
+  "/assets/2Character_essential-10.png",
+  "/assets/3Character_essential-06.png",
+  "/assets/3Character_essential-07.png",
+  "/assets/3Character_essential-08.png",
+  "/assets/3Character_essential-09.png",
+  "/assets/3Character_essential-10.png",
+  "/assets/Character_essential-06.png",
+  "/assets/Character_essential-07.png",
+  "/assets/Character_essential-09.png",
+  "/assets/Character_essential-10.png",
+  "/assets/KeyCharacter_essential.png",
+  "/assets/PS%20ASSEST%20UI-21.png",
+  "/assets/PS%20ASSEST%20UI-22.png",
+  "/assets/PS%20ASSEST%20UI-23.png",
+  "/assets/PS%20ASSEST%20UI-24.png",
+  "/assets/Vitou.png",
+  "/assets/VitouItemCharacter_essential.png",
+  "/assets/keyholes.png",
+  "/assets/pslogowhite.png",
+  "/assets/pteah-silapak-logo.png",
+  "/assets/pteah-silapak-pattern.png",
+  "/assets/pteah-silapak-wordmark.png",
+];
+
 export function getImageLoadingProps(priority = false) {
   return {
     loading: "eager",
@@ -346,7 +375,10 @@ function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, lan
     preloadImages([optimizedAssets.logo, optimizedAssets.wordmark, optimizedAssets.cover.key], "high");
 
     const preloadDecorations = () => {
-      preloadImages(coverPreloadSources.filter((src) => ![optimizedAssets.logo, optimizedAssets.wordmark, optimizedAssets.cover.key].includes(src)));
+      const primarySources = [optimizedAssets.logo, optimizedAssets.wordmark, optimizedAssets.cover.key];
+      preloadImages(
+        [...coverPreloadSources, ...pngPreloadSources].filter((src) => !primarySources.includes(src)),
+      );
     };
 
     let scheduleId;

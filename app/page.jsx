@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { SiFacebook, SiInstagram } from "react-icons/si";
 import { copy, languages } from "./data/content";
 import { characters, questions, sections } from "./data/quizData";
 import { getPreviewRanking, getRankedResults, getWinner, isQuizComplete } from "./lib/scoring";
@@ -931,6 +932,7 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
           </button>
         </div>
         <button type="button" onClick={onHome} className="mt-5 text-xs font-black text-[#66883e] underline underline-offset-4">{text.backHome}</button>
+        <SocialLinks text={text} />
       </div>
     </Shell>
   );
@@ -938,6 +940,39 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
 
 function getSection(index) {
   return sections.find((section) => index >= section.start && index <= section.end) || sections[0];
+}
+
+const socialLinks = {
+  instagram: "https://www.instagram.com/pteahsilapak?igsi=MTdsYWQydGY3Z3hxbQ==",
+  facebook: "https://www.facebook.com/share/19bXDDxrB1/?mibextid=wwXIfr",
+};
+
+function SocialLinks({ text }) {
+  return (
+    <section className="-mx-6 mt-10 flex flex-col items-center gap-5 bg-transparent px-6 py-8 text-center text-[#1a4c19]" aria-labelledby="social-links-title">
+      <h2 id="social-links-title" className="text-2xl font-black tracking-tight">{text.followJourney}</h2>
+      <div className="flex items-center gap-4">
+        <a
+          href={socialLinks.instagram}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Follow Pteah Silapak on Instagram"
+          className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] shadow-md transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a4c19]"
+        >
+          <SiInstagram className="h-10 w-10 text-white" aria-hidden="true" />
+        </a>
+        <a
+          href={socialLinks.facebook}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Follow Pteah Silapak on Facebook"
+          className="grid h-16 w-16 place-items-center rounded-2xl bg-[#1877f2] shadow-md transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a4c19]"
+        >
+          <SiFacebook className="h-10 w-10 text-white" aria-hidden="true" />
+        </a>
+      </div>
+    </section>
+  );
 }
 
 export default function Home() {

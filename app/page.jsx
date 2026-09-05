@@ -457,15 +457,15 @@ function Cover({ text, language, onEnter, onBack }) {
         </div>
 
         <div className="cover-art-stage">
-          <CoverAsset src={optimizedAssets.cover.key} variant="key" label="Key" className="cover-art-key" imageClassName="rotate-90 scale-[1.35] sm:scale-[1.65]" priority />
-          <CoverAsset src={optimizedAssets.cover.notebook} variant="notebook" label="A N I T A" className="cover-art-notebook" imageClassName="scale-[1.4]" />
-          <CoverAsset src={optimizedAssets.cover.fortune} variant="fortune" label="FORTUNE" className="cover-art-fortune" imageClassName="scale-[1.65]" />
-          <CoverAsset src={optimizedAssets.cover.greenTicket} variant="green-ticket" label="ANITA" className="cover-art-green-ticket" imageClassName="scale-[1.65]" />
-          <CoverAsset src={optimizedAssets.cover.studentId} variant="student-id" label="STUDENT ID" className="cover-art-student-id" imageClassName="rotate-90 scale-[1.4]" />
-          <CoverAsset src={optimizedAssets.cover.receipt} variant="receipt" label="LUCKY STORE" className="cover-art-receipt" imageClassName="scale-[1.2]" />
-          <CoverAsset src={optimizedAssets.cover.ticketStub} variant="ticket-stub" label="A13" className="cover-art-ticket-stub" imageClassName="scale-[1.9]" />
-          <CoverAsset src={optimizedAssets.cover.boardingPass} variant="boarding-pass" label="TICKET" className="cover-art-boarding-pass" imageClassName="scale-[1.2]" />
-          <CoverAsset src={optimizedAssets.cover.camera} variant="camera" label="●" className="cover-art-camera" imageClassName="scale-[1.4]" />
+          <CoverAsset src={optimizedAssets.cover.key} variant="key" label="Key" className="cover-art-key" imageClassName="rotate-90 scale-100 sm:scale-[1.65]" priority />
+          <CoverAsset src={optimizedAssets.cover.notebook} variant="notebook" label="A N I T A" className="cover-art-notebook" imageClassName="scale-100 sm:scale-[1.4]" />
+          <CoverAsset src={optimizedAssets.cover.fortune} variant="fortune" label="FORTUNE" className="cover-art-fortune" imageClassName="scale-100 sm:scale-[1.65]" />
+          <CoverAsset src={optimizedAssets.cover.greenTicket} variant="green-ticket" label="ANITA" className="cover-art-green-ticket" imageClassName="scale-100 sm:scale-[1.65]" />
+          <CoverAsset src={optimizedAssets.cover.studentId} variant="student-id" label="STUDENT ID" className="cover-art-student-id" imageClassName="rotate-90 scale-100 sm:scale-[1.4]" />
+          <CoverAsset src={optimizedAssets.cover.receipt} variant="receipt" label="LUCKY STORE" className="cover-art-receipt" imageClassName="scale-100 sm:scale-[1.2]" />
+          <CoverAsset src={optimizedAssets.cover.ticketStub} variant="ticket-stub" label="A13" className="cover-art-ticket-stub" imageClassName="scale-100 sm:scale-[1.9]" />
+          <CoverAsset src={optimizedAssets.cover.boardingPass} variant="boarding-pass" label="TICKET" className="cover-art-boarding-pass" imageClassName="scale-100 sm:scale-[1.2]" />
+          <CoverAsset src={optimizedAssets.cover.camera} variant="camera" label="●" className="cover-art-camera" imageClassName="scale-100 sm:scale-[1.4]" />
           <CoverAsset src={optimizedAssets.cover.passport} variant="passport" label="HOUSE OF CREATIVE" className="cover-art-passport" />
         </div>
 

@@ -446,7 +446,7 @@ function Cover({ text, language, onEnter, onBack }) {
         </button>
       </header>
 
-      <div className="cover-screen relative min-h-0 flex-1 overflow-hidden text-center">
+      <div className="cover-screen relative min-h-0 flex-1 overflow-visible text-center">
         <div className="cover-intro z-20 flex flex-col items-center">
           <h1 className={`${language === "km" ? "max-w-[340px] text-[1.8rem] leading-[1.45]" : "max-w-[350px] text-[2.8rem] leading-[0.92]"} whitespace-pre-line font-black tracking-tight text-[#66883e]`}>
             {language === "en" ? "Find Your\nCreative Room" : text.title}

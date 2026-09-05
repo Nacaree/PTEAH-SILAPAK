@@ -256,11 +256,13 @@ button:disabled {
   position: relative;
   min-height: 0;
   flex: 1 1 auto;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
 }
 
 .cover-enter-wrap {
+  position: relative;
+  z-index: 20;
   display: flex;
   flex: none;
   justify-content: center;

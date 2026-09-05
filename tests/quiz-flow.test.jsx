@@ -12,16 +12,16 @@ describe("quiz flow", () => {
     render(<Home />);
 
     fireEvent.click(await screen.findByRole("button", { name: "ENG" }));
-    expect(await screen.findByText("Find your creative room")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Find\s+your\s+creative\s+room/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Enter" }));
     expect(await screen.findByText("Introduction")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Next/ }));
-    expect(await screen.findByText("15 questions")).toBeInTheDocument();
+    expect(await screen.findByText(/15 questions/i)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Begin/ }));
-    expect(await screen.findByText("Identity & Self-Perception")).toBeInTheDocument();
+    expect(await screen.findByText(/Identity & Self\s*-\s*Perception/)).toBeInTheDocument();
   });
 
   it("restores saved quiz progress from local storage", async () => {

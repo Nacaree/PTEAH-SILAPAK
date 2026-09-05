@@ -1,9 +1,9 @@
 import { existsSync, statSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { getImageLoadingProps, optimizedAssets } from "../app/page";
 
-const projectRoot = fileURLToPath(new URL("../", import.meta.url));
+const projectRoot = resolve(process.cwd());
 const assetUrls = [
   optimizedAssets.logo,
   optimizedAssets.wordmark,

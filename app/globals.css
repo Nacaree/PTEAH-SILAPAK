@@ -226,6 +226,244 @@ button:disabled {
   border-radius: 0 0 3rem 3rem;
 }
 
+.cover-shell {
+  height: 100svh;
+  min-height: 100svh;
+  max-height: 100svh;
+}
+
+.cover-page-root {
+  height: 100svh;
+  min-height: 100svh;
+}
+
+.cover-header-bar {
+  height: clamp(4.5rem, 11svh, 6rem);
+}
+
+.cover-screen {
+  display: flex;
+  flex-direction: column;
+}
+
+.cover-intro {
+  position: relative;
+  flex: none;
+  padding: clamp(0.9rem, 3.2svh, 2.5rem) 1.5rem 0;
+}
+
+.cover-art-stage {
+  position: relative;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  width: 100%;
+}
+
+.cover-enter-wrap {
+  display: flex;
+  flex: none;
+  justify-content: center;
+  padding: 0.4rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+}
+
+.cover-art-key {
+  top: 50%;
+  left: 50%;
+  z-index: 10;
+  width: clamp(8.25rem, 43vw, 11.5rem);
+  height: clamp(12rem, 74%, 18rem);
+  transform: translate(-50%, -50%);
+}
+
+.cover-art-notebook {
+  top: 8%;
+  left: -4%;
+  width: 27%;
+  height: 32%;
+  transform: rotate(12deg);
+}
+
+.cover-art-fortune {
+  top: 5%;
+  right: -5%;
+  width: 28%;
+  height: 26%;
+  transform: rotate(50deg);
+}
+
+.cover-art-green-ticket {
+  top: 42%;
+  left: -7%;
+  width: 31%;
+  height: 18%;
+  transform: rotate(280deg);
+}
+
+.cover-art-student-id {
+  top: 34%;
+  right: -4%;
+  width: 27%;
+  height: 32%;
+  transform: rotate(289deg);
+}
+
+.cover-art-receipt {
+  top: 64%;
+  left: -5%;
+  width: 26%;
+  height: 31%;
+  transform: rotate(26deg);
+}
+
+.cover-art-ticket-stub {
+  top: 16%;
+  right: -7%;
+  width: 31%;
+  height: 22%;
+  transform: rotate(-106deg);
+}
+
+.cover-art-boarding-pass {
+  bottom: -5%;
+  left: -9%;
+  width: 32%;
+  height: 32%;
+  transform: rotate(-49deg);
+}
+
+.cover-art-camera {
+  bottom: -10%;
+  left: -4%;
+  width: 32%;
+  height: 29%;
+  transform: rotate(-102deg);
+}
+
+.cover-art-passport {
+  right: -5%;
+  bottom: -8%;
+  width: 32%;
+  height: 38%;
+  transform: rotate(-12deg);
+}
+
+@media (min-width: 640px) {
+  .cover-shell {
+    height: 820px;
+    min-height: 820px;
+    max-height: 820px;
+  }
+
+  .cover-header-bar {
+    height: 6rem;
+  }
+
+  .cover-screen {
+    display: block;
+  }
+
+  .cover-intro {
+    position: absolute;
+    inset-inline: 1.5rem;
+    top: 2.5rem;
+    padding: 0;
+  }
+
+  .cover-art-stage {
+    position: absolute;
+    inset: 0;
+  }
+
+  .cover-enter-wrap {
+    position: absolute;
+    inset: 0;
+    display: block;
+    padding: 0;
+    pointer-events: none;
+  }
+
+  .cover-enter {
+    position: absolute;
+    top: 510px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: auto;
+  }
+
+  .cover-art-key {
+    top: 184px;
+    left: 50%;
+    width: 190px;
+    height: 280px;
+    transform: translateX(-50%);
+  }
+
+  .cover-art-notebook {
+    top: 190px;
+    left: 1px;
+    width: 105px;
+    height: 132px;
+  }
+
+  .cover-art-fortune {
+    top: 188px;
+    right: -16px;
+    width: 108px;
+    height: 90px;
+  }
+
+  .cover-art-green-ticket {
+    top: 364px;
+    left: -16px;
+    width: 118px;
+    height: 64px;
+  }
+
+  .cover-art-student-id {
+    top: 325px;
+    right: -8px;
+    width: 102px;
+    height: 122px;
+  }
+
+  .cover-art-receipt {
+    top: 433px;
+    left: -1px;
+    width: 98px;
+    height: 122px;
+  }
+
+  .cover-art-ticket-stub {
+    top: 115px;
+    right: -20px;
+    width: 128px;
+    height: 70px;
+  }
+
+  .cover-art-boarding-pass {
+    bottom: auto;
+    top: 545px;
+    left: -20px;
+    width: 116px;
+    height: 116px;
+  }
+
+  .cover-art-camera {
+    bottom: -20px;
+    left: -8px;
+    width: 122px;
+    height: 92px;
+  }
+
+  .cover-art-passport {
+    right: -8px;
+    bottom: -12px;
+    width: 112px;
+    height: 146px;
+  }
+}
+
 .cover-header-wordmark {
   width: 7rem;
   height: 3rem;

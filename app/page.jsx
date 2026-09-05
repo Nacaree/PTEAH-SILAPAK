@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { SiFacebook, SiInstagram } from "react-icons/si";
 import { copy, languages } from "./data/content";
-import { characters, questions, sections } from "./data/quizData";
+import { characterIds, characters, questions, sections } from "./data/quizData";
 import { getPreviewRanking, getRankedResults, getWinner, isQuizComplete } from "./lib/scoring";
-import { getShareUrl } from "./lib/sharing";
+import { buildSharePayload, getShareUrl } from "./lib/sharing";
 
 const STORAGE_KEY = "pteah-silapak-quiz-v2";
 const baseTheme = {
@@ -36,6 +36,9 @@ export const optimizedAssets = {
 const coverPreloadSources = [
   optimizedAssets.logo,
   optimizedAssets.wordmark,
+  optimizedAssets.whiteLogo,
+  optimizedAssets.keyholes,
+  optimizedAssets.pattern,
   ...Object.values(optimizedAssets.cover),
 ];
 
@@ -67,6 +70,8 @@ const pngPreloadSources = [
   "/assets/pteah-silapak-pattern.png",
   "/assets/pteah-silapak-wordmark.png",
 ];
+
+const allPreloadSources = [...new Set([...coverPreloadSources, ...pngPreloadSources])];
 
 export function getImageLoadingProps(priority = false) {
   return {
@@ -267,6 +272,7 @@ export function ScreenTransition({ transitionKey, direction = "forward", childre
           key={`outgoing-${outgoing.key}`}
           className={`screen-transition-layer screen-transition-layer--outgoing screen-transition-layer--exiting-${outgoing.direction}`}
           aria-hidden="true"
+          inert
         >
           {outgoing.node}
         </div>
@@ -290,13 +296,14 @@ function Shell({
   patternAccent,
   patternExactColors = false,
   scroll = false,
+  cover = false,
   language = "en",
 }) {
   return (
-    <main className="min-h-[100dvh] bg-[#2b2b2b] sm:grid sm:place-items-center sm:p-6">
+    <main className={`${cover ? "cover-page-root" : "min-h-[100dvh]"} bg-[#2b2b2b] sm:grid sm:place-items-center sm:p-6`}>
       <div
         lang={language === "km" ? "km" : "en"}
-        className={`relative mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-[var(--soft)] text-[var(--ink)] shadow-2xl sm:min-h-[820px] sm:rounded-[2rem] ${language === "km" ? "font-khmer" : ""} ${scroll ? "max-h-[100dvh] overflow-y-auto sm:max-h-[calc(100dvh-3rem)]" : "sm:h-[820px]"}`}
+        className={`relative mx-auto flex min-h-[100dvh] w-full max-w-[430px] flex-col overflow-hidden bg-[var(--soft)] text-[var(--ink)] shadow-2xl sm:rounded-[2rem] ${cover ? "cover-shell" : "sm:min-h-[820px]"} ${language === "km" ? "font-khmer" : ""} ${scroll ? "max-h-[100dvh] overflow-y-auto sm:max-h-[calc(100dvh-3rem)]" : cover ? "" : "sm:h-[820px]"}`}
         style={{
           "--theme": theme.color,
           "--soft": theme.soft,
@@ -371,34 +378,6 @@ function PrimaryButton({ children, onClick, disabled = false, light = false }) {
 }
 
 function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, language }) {
-  useEffect(() => {
-    preloadImages([optimizedAssets.logo, optimizedAssets.wordmark, optimizedAssets.cover.key], "high");
-
-    const preloadDecorations = () => {
-      const primarySources = [optimizedAssets.logo, optimizedAssets.wordmark, optimizedAssets.cover.key];
-      preloadImages(
-        [...coverPreloadSources, ...pngPreloadSources].filter((src) => !primarySources.includes(src)),
-      );
-    };
-
-    let scheduleId;
-    let usingIdleCallback = false;
-    if ("requestIdleCallback" in window) {
-      usingIdleCallback = true;
-      scheduleId = window.requestIdleCallback(preloadDecorations, { timeout: 700 });
-    } else {
-      scheduleId = window.setTimeout(preloadDecorations, 150);
-    }
-
-    return () => {
-      if (usingIdleCallback && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(scheduleId);
-      } else {
-        window.clearTimeout(scheduleId);
-      }
-    };
-  }, []);
-
   return (
     <Shell language={language}>
       <div className="flex flex-1 flex-col items-center justify-center px-8 py-12 text-[#66883e]">
@@ -451,8 +430,8 @@ function CoverAsset({ src, variant, className, imageClassName = "", priority = f
 
 function Cover({ text, language, onEnter, onBack }) {
   return (
-    <Shell theme={baseTheme} language={language}>
-      <header className="cover-header relative grid h-24 shrink-0 place-items-center bg-[#66883e]">
+    <Shell theme={baseTheme} language={language} cover>
+      <header className="cover-header cover-header-bar relative grid shrink-0 place-items-center bg-[#66883e]">
         <button
           type="button"
           onClick={onBack}
@@ -467,8 +446,8 @@ function Cover({ text, language, onEnter, onBack }) {
         </button>
       </header>
 
-      <div className="relative min-h-0 flex-1 overflow-hidden text-center">
-        <div className="absolute inset-x-6 top-10 z-20 flex flex-col items-center">
+      <div className="cover-screen relative min-h-0 flex-1 overflow-hidden text-center">
+        <div className="cover-intro z-20 flex flex-col items-center">
           <h1 className={`${language === "km" ? "max-w-[340px] text-[1.8rem] leading-[1.45]" : "max-w-[350px] text-[2.8rem] leading-[0.92]"} whitespace-pre-line font-black tracking-tight text-[#66883e]`}>
             {language === "en" ? "Find Your\nCreative Room" : text.title}
           </h1>
@@ -477,49 +456,24 @@ function Cover({ text, language, onEnter, onBack }) {
           </p>
         </div>
 
-        <CoverAsset
-          src={optimizedAssets.cover.key}
-          variant="key"
-          label="Key"
-          className="left-1/2 top-[184px] z-10 h-[280px] w-[190px] -translate-x-1/2"
-          imageClassName="rotate-90 scale-[1.65]"
-          priority
-        />
+        <div className="cover-art-stage">
+          <CoverAsset src={optimizedAssets.cover.key} variant="key" label="Key" className="cover-art-key" imageClassName="rotate-90 scale-[1.35] sm:scale-[1.65]" priority />
+          <CoverAsset src={optimizedAssets.cover.notebook} variant="notebook" label="A N I T A" className="cover-art-notebook" imageClassName="scale-[1.4]" />
+          <CoverAsset src={optimizedAssets.cover.fortune} variant="fortune" label="FORTUNE" className="cover-art-fortune" imageClassName="scale-[1.65]" />
+          <CoverAsset src={optimizedAssets.cover.greenTicket} variant="green-ticket" label="ANITA" className="cover-art-green-ticket" imageClassName="scale-[1.65]" />
+          <CoverAsset src={optimizedAssets.cover.studentId} variant="student-id" label="STUDENT ID" className="cover-art-student-id" imageClassName="rotate-90 scale-[1.4]" />
+          <CoverAsset src={optimizedAssets.cover.receipt} variant="receipt" label="LUCKY STORE" className="cover-art-receipt" imageClassName="scale-[1.2]" />
+          <CoverAsset src={optimizedAssets.cover.ticketStub} variant="ticket-stub" label="A13" className="cover-art-ticket-stub" imageClassName="scale-[1.9]" />
+          <CoverAsset src={optimizedAssets.cover.boardingPass} variant="boarding-pass" label="TICKET" className="cover-art-boarding-pass" imageClassName="scale-[1.2]" />
+          <CoverAsset src={optimizedAssets.cover.camera} variant="camera" label="●" className="cover-art-camera" imageClassName="scale-[1.4]" />
+          <CoverAsset src={optimizedAssets.cover.passport} variant="passport" label="HOUSE OF CREATIVE" className="cover-art-passport" />
+        </div>
 
-        <CoverAsset src={optimizedAssets.cover.notebook} variant="notebook" label="A N I T A" className="left-1 top-[190px] h-[132px] w-[105px] rotate-[12deg]"
-        imageClassName="scale-[1.4]" />
-
-        <CoverAsset src={optimizedAssets.cover.fortune} variant="fortune" label="FORTUNE" className="-right-4 top-[188px] h-[90px] w-[108px] rotate-[50deg]"
-        imageClassName="scale-[1.65]" />
-
-        <CoverAsset src={optimizedAssets.cover.greenTicket} variant="green-ticket" label="ANITA" className="-left-4 top-[364px] h-[64px] w-[118px] rotate-[280deg]"
-        imageClassName="scale-[1.65]" />
-
-        <CoverAsset src={optimizedAssets.cover.studentId} variant="student-id" label="STUDENT ID" className="-right-2 top-[325px] h-[122px] w-[102px] rotate-[289deg]" imageClassName="rotate-90 scale-[1.4]" 
-         />
-
-        <CoverAsset src={optimizedAssets.cover.receipt} variant="receipt" label="LUCKY STORE" className="-left-0.2 top-[433px] h-[122px] w-[98px] rotate-[26deg]"
-        imageClassName="scale-[1.2]"
-         />
-
-        <CoverAsset src={optimizedAssets.cover.ticketStub} variant="ticket-stub" label="A13" className="-right-5 top-115 h-[70px] w-[128px] -rotate-[106deg]" imageClassName="scale-[1.9]" />
-
-        <CoverAsset src={optimizedAssets.cover.boardingPass} variant="boarding-pass" label="TICKET" className="-left-5 top-[545px] h-[116px] w-[116px] -rotate-[49deg]"
-        imageClassName="scale-[1.2]"
-        />
-
-        <CoverAsset src={optimizedAssets.cover.camera} variant="camera" label="●" className="-bottom-5 -left-2 h-[92px] w-[122px] -rotate-[102deg]"
-        imageClassName="scale-[1.4]" />
-
-        <CoverAsset src={optimizedAssets.cover.passport} variant="passport" label="HOUSE OF CREATIVE" className="-bottom-3 -right-2 h-[146px] w-[112px] -rotate-[12deg]" />
-
-        <button
-          type="button"
-          onClick={onEnter}
-          className="absolute left-1/2 top-[510px] z-30 grid min-h-16 w-48 -translate-x-1/2 place-items-center rounded-[1.75rem] bg-[#66883e] px-6 text-2xl font-black text-white shadow-[0_12px_26px_rgba(26,76,25,0.12)] transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#66883e]"
-        >
-          {text.enter}
-        </button>
+        <div className="cover-enter-wrap">
+          <button type="button" onClick={onEnter} className="cover-enter grid min-h-16 w-48 place-items-center rounded-[1.75rem] bg-[#66883e] px-6 text-2xl font-black text-white shadow-[0_12px_26px_rgba(26,76,25,0.12)] transition hover:brightness-95 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#66883e]">
+            {text.enter}
+          </button>
+        </div>
 
       </div>
     </Shell>
@@ -807,7 +761,124 @@ function QuestionScreen({ question, index, section, answer, text, language, onAn
   );
 }
 
-function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onShare, copied, shared }) {
+function CharacterDetails({ character, text, language }) {
+  const palette = resultPalettes[character.id];
+
+  return (
+    <dl className="mt-3 grid w-full gap-3 text-left">
+      {["strength", "challenge", "hiddenFear", "traits"].map((field) => (
+        <div
+          key={field}
+          className={`${field === "traits" ? "" : "grid grid-cols-[6.5rem_1fr]"} overflow-hidden border-2 border-[#0b210b] shadow-sm`}
+          style={{ backgroundColor: palette.accent, color: palette.accentText }}
+        >
+          <dt
+            className={`flex items-center px-3 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"} ${field === "traits" ? "py-3" : "py-4"}`}
+            style={{ backgroundColor: palette.label, color: palette.labelText }}
+          >
+            {text[field]}
+          </dt>
+          <dd className={`min-w-0 p-4 text-sm font-semibold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>{localize(character[field], language)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
+function CharacterGallery({ resultId, ranking, selectedCharacterId, onSelectCharacter, text, language, onBack, shared }) {
+  const headingRef = useRef(null);
+  const tabRefs = useRef({});
+  const orderedIds = ranking
+    ? ranking.map((match) => match.characterId)
+    : [resultId, ...characterIds.filter((id) => id !== resultId)];
+  const selectedId = selectedCharacterId || resultId;
+  const character = characters[selectedId];
+  const palette = resultPalettes[selectedId];
+
+  useEffect(() => {
+    headingRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  function handleTabKeyDown(event, index) {
+    let nextIndex;
+    if (event.key === "ArrowRight") nextIndex = (index + 1) % orderedIds.length;
+    else if (event.key === "ArrowLeft") nextIndex = (index - 1 + orderedIds.length) % orderedIds.length;
+    else if (event.key === "Home") nextIndex = 0;
+    else if (event.key === "End") nextIndex = orderedIds.length - 1;
+    else return;
+
+    event.preventDefault();
+    const nextId = orderedIds[nextIndex];
+    onSelectCharacter(nextId);
+    tabRefs.current[nextId]?.focus({ preventScroll: true });
+  }
+
+  return (
+    <Shell scroll language={language}>
+      <div className="px-6 pb-5 pt-6 text-[#1a4c19]">
+        <button type="button" onClick={onBack} className="min-h-11 text-left text-sm font-bold underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4">
+          <span aria-hidden="true">← </span>{shared ? text.backToSharedResult : text.backToResult}
+        </button>
+        <h1 ref={headingRef} tabIndex={-1} className={`mt-5 text-3xl font-black focus:outline-none ${language === "km" ? "leading-relaxed" : "leading-tight"}`}>{text.galleryTitle}</h1>
+        <p className={`mt-3 text-sm ${language === "km" ? "leading-7" : "leading-relaxed"}`}>{text.galleryIntro}</p>
+      </div>
+
+      <div className="sticky top-0 z-20 shrink-0 border-y-2 border-[#1a4c19]/15 bg-[#fafafa] px-3 py-3">
+        <div role="tablist" aria-label={text.characterNavigation} className="grid grid-cols-5 gap-1">
+          {orderedIds.map((id, index) => {
+            const tabCharacter = characters[id];
+            const selected = id === selectedId;
+            const match = ranking?.find((entry) => entry.characterId === id);
+            return (
+              <button
+                key={id}
+                ref={(node) => { tabRefs.current[id] = node; }}
+                id={`character-tab-${id}`}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                aria-controls={`character-panel-${id}`}
+                tabIndex={selected ? 0 : -1}
+                onClick={() => onSelectCharacter(id)}
+                onKeyDown={(event) => handleTabKeyDown(event, index)}
+                className={`flex min-w-0 flex-col items-center gap-1 rounded-xl border-2 px-1 py-2 text-center text-[#1a4c19] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a4c19] ${selected ? "border-[#1a4c19] bg-[#1a4c19]/5" : "border-transparent hover:bg-[#1a4c19]/5"}`}
+              >
+                <span className="grid h-12 w-10 place-items-center rounded-lg" style={{ backgroundColor: resultPalettes[id].accent }} aria-hidden="true">
+                  {tabCharacter.image ? <img src={tabCharacter.image} alt="" className="h-12 w-10 object-contain" decoding="async" /> : tabCharacter.mark}
+                </span>
+                <span className={`w-full break-words text-[11px] font-bold ${language === "km" ? "leading-5" : "leading-4"}`}>{localize(tabCharacter.name, language)}</span>
+                {match && <span className="mt-auto text-[11px] font-bold">{match.percentage.toFixed(1)}%</span>}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {orderedIds.map((id) => (
+        <section key={id} id={`character-panel-${id}`} role="tabpanel" aria-labelledby={`character-tab-${id}`} hidden={id !== selectedId} tabIndex={0} className="px-6 pb-10 pt-7 text-center text-[#1a4c19] focus-visible:outline-2 focus-visible:outline-offset-[-4px]">
+          {id === selectedId && (
+            <>
+              <h2 className={`text-3xl font-black ${language === "km" ? "leading-relaxed" : "leading-tight"}`}>{localize(character.name, language)}</h2>
+              <p className={`mt-2 text-sm font-bold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>{localize(character.archetype, language)}</p>
+              <div className="relative my-6 flex h-64 items-center justify-center">
+                <span className="absolute h-52 w-44 rotate-[-8deg] rounded-[48%_52%_46%_54%] opacity-25" style={{ backgroundColor: palette.accent }} aria-hidden="true" />
+                {character.image ? <img src={character.image} alt={localize(character.name, language)} decoding="async" className="relative h-full max-w-full object-contain" /> : <span className="relative text-8xl">{character.mark}</span>}
+              </div>
+              <p className={`mb-7 text-lg font-bold ${language === "km" ? "leading-8" : "leading-relaxed"}`}>{localize(character.summary, language)}</p>
+              <CharacterDetails character={character} text={text} language={language} />
+            </>
+          )}
+        </section>
+      ))}
+    </Shell>
+  );
+}
+
+function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onShare, onGallery, restoreGalleryFocus, shareStatus, shared }) {
+  const galleryButtonRef = useRef(null);
+  useEffect(() => {
+    if (restoreGalleryFocus) galleryButtonRef.current?.focus();
+  }, [restoreGalleryFocus]);
   const topMatch = ranking?.[0];
   const secondMatch = ranking?.[1];
   const runnerUp = secondMatch ? characters[secondMatch.characterId] : null;
@@ -822,7 +893,6 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
   };
   const resultAccentText = palette.accentText;
   const resultLabelColor = palette.label;
-  const resultLabelText = palette.labelText;
   const breakdownTrack = palette.breakdownTrack || `${resultLabelColor}45`;
 
   return (
@@ -906,24 +976,7 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
         )}
 
         <h2 className="mt-8 w-full text-left text-sm font-black uppercase tracking-[0.14em] text-[#1a4c19]">{text.moreInfo}</h2>
-        <div className="mt-3 grid w-full gap-3 text-left">
-          <div className="grid grid-cols-[6.5rem_1fr] overflow-hidden border-2 border-[#0b210b] shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>
-            <p className="flex items-center px-3 py-4 text-[10px] font-black uppercase tracking-[0.12em]" style={{ backgroundColor: resultLabelColor, color: resultLabelText }}>{text.strength}</p>
-            <p className="p-4 text-sm font-semibold leading-relaxed">{localize(winner.strength, language)}</p>
-          </div>
-          <div className="grid grid-cols-[6.5rem_1fr] overflow-hidden border-2 border-[#0b210b] shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>
-            <p className="flex items-center px-3 py-4 text-[10px] font-black uppercase tracking-[0.12em]" style={{ backgroundColor: resultLabelColor, color: resultLabelText }}>{text.challenge}</p>
-            <p className="p-4 text-sm font-semibold leading-relaxed">{localize(winner.challenge, language)}</p>
-          </div>
-          <div className="grid grid-cols-[6.5rem_1fr] overflow-hidden border-2 border-[#0b210b] shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>
-            <p className="flex items-center px-3 py-4 text-[10px] font-black uppercase tracking-[0.12em]" style={{ backgroundColor: resultLabelColor, color: resultLabelText }}>{text.hiddenFear}</p>
-            <p className="p-4 text-sm font-semibold leading-relaxed">{localize(winner.hiddenFear, language)}</p>
-          </div>
-          <div className="overflow-hidden border-2 border-[#0b210b] shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>
-            <p className="px-3 py-3 text-[10px] font-black uppercase tracking-[0.18em]" style={{ backgroundColor: resultLabelColor, color: resultLabelText }}>{text.traits}</p>
-            <p className="p-4 text-sm font-semibold leading-relaxed">{localize(winner.traits, language)}</p>
-          </div>
-        </div>
+        <CharacterDetails character={winner} text={text} language={language} />
 
         {ranking && !shared && (
           <div
@@ -957,8 +1010,12 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
           <p className="mt-7 rounded-full px-5 py-2 text-xs font-bold shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>{text.sharedResult}</p>
         )}
 
-        <div className="mt-8 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
-          <PrimaryButton onClick={onShare}>{copied ? text.copied : text.share}</PrimaryButton>
+        <button ref={galleryButtonRef} type="button" onClick={onGallery} className="mt-8 min-h-14 w-full rounded-full bg-[#1a4c19] px-6 py-4 text-sm font-black text-white shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1a4c19]">
+          {text.meetCharacters}<span aria-hidden="true"> →</span>
+        </button>
+
+        <div className="mt-4 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+          <PrimaryButton onClick={onShare}>{shareStatus === "shared" ? text.shared : shareStatus === "copied" ? text.copied : text.share}</PrimaryButton>
           <button type="button" onClick={onRetake} className="min-h-12 rounded-full border-2 border-[#1a4c19]/25 bg-white px-5 text-sm font-black text-[#1a4c19] transition hover:border-[#1a4c19]/50">
             {text.retake}
           </button>
@@ -1013,11 +1070,18 @@ export default function Home() {
   const [answers, setAnswers] = useState({});
   const [currentIndex, setCurrentIndex] = useState(0);
   const [notice, setNotice] = useState("");
-  const [copied, setCopied] = useState(false);
   const [hydrated, setHydrated] = useState(false);
   const [sharedResultId, setSharedResultId] = useState(null);
   const [previewCharacterId, setPreviewCharacterId] = useState(null);
   const [previewRunnerUpId, setPreviewRunnerUpId] = useState(null);
+  const [selectedCharacterId, setSelectedCharacterId] = useState(null);
+  const [shareStatus, setShareStatus] = useState(null);
+
+  useEffect(() => {
+    // Start every artwork request when the app mounts so direct result links and
+    // later screens get the same warm browser cache as the landing page.
+    preloadImages(allPreloadSources);
+  }, []);
 
   const text = copy[language] && Object.keys(copy[language]).length ? copy[language] : copy.en;
   const currentQuestion = questions[currentIndex];
@@ -1029,6 +1093,7 @@ export default function Home() {
     [previewCharacterId, previewRunnerUpId],
   );
   const resultId = previewCharacterId || sharedResultId || ranking[0].characterId;
+  const resultRanking = previewCharacterId ? previewRanking : sharedResultId || !complete ? null : ranking;
   const [transitionDirection, setTransitionDirection] = useState("forward");
 
   useEffect(() => {
@@ -1062,7 +1127,7 @@ export default function Home() {
         setLanguage(languages[saved.language]?.available ? saved.language : "en");
         setAnswers(saved.answers || {});
         setCurrentIndex(Number.isInteger(saved.currentIndex) ? saved.currentIndex : 0);
-        setScreen(saved.screen || "landing");
+        setScreen(saved.screen === "gallery" ? (isQuizComplete(saved.answers || {}) ? "result" : "landing") : saved.screen || "landing");
       }
     } catch {
       window.localStorage.removeItem(STORAGE_KEY);
@@ -1078,13 +1143,18 @@ export default function Home() {
     if (!hydrated || sharedResultId || previewCharacterId) return;
     window.localStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ language, answers, currentIndex, screen }),
+      JSON.stringify({ language, answers, currentIndex, screen: screen === "gallery" ? "result" : screen }),
     );
   }, [answers, currentIndex, hydrated, language, previewCharacterId, screen, sharedResultId]);
 
   function navigate(nextScreen, direction = "forward") {
     setTransitionDirection(direction);
     setScreen(nextScreen);
+  }
+
+  function openGallery() {
+    setSelectedCharacterId(resultId);
+    navigate("gallery", "forward");
   }
 
   function selectLanguage(id) {
@@ -1142,6 +1212,8 @@ export default function Home() {
   }
 
   function goHome() {
+    setSelectedCharacterId(null);
+    setShareStatus(null);
     setSharedResultId(null);
     setPreviewCharacterId(null);
     setPreviewRunnerUpId(null);
@@ -1150,12 +1222,13 @@ export default function Home() {
   }
 
   function resetQuiz(destination = "cover", direction = "forward") {
+    setSelectedCharacterId(null);
     setAnswers({});
     setCurrentIndex(0);
     setSharedResultId(null);
     setPreviewCharacterId(null);
     setPreviewRunnerUpId(null);
-    setCopied(false);
+    setShareStatus(null);
     window.localStorage.removeItem(STORAGE_KEY);
     window.history.replaceState({}, "", window.location.pathname);
     navigate(destination, direction);
@@ -1174,12 +1247,34 @@ export default function Home() {
 
   async function shareResult() {
     const url = getShareUrl(resultId, window.location.origin, window.location.pathname);
+    const payload = buildSharePayload({
+      characterName: localize(characters[resultId].name, language),
+      summary: localize(characters[resultId].summary, language),
+      resultUrl: url,
+    });
+    const clipboardText = `${payload.text}\n\n${payload.url}`;
+
     try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2200);
-    } catch {
-      window.prompt(text.copyPrompt, url);
+      if (typeof navigator.share === "function") {
+        await navigator.share(payload);
+        setShareStatus("shared");
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(clipboardText);
+        setShareStatus("copied");
+      } else {
+        throw new Error("Clipboard unavailable");
+      }
+      window.setTimeout(() => setShareStatus(null), 2200);
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+      try {
+        if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+        await navigator.clipboard.writeText(clipboardText);
+        setShareStatus("copied");
+        window.setTimeout(() => setShareStatus(null), 2200);
+      } catch {
+        window.prompt(text.copyPrompt, clipboardText);
+      }
     }
   }
 
@@ -1228,13 +1323,28 @@ export default function Home() {
     screenContent = (
       <ResultScreen
         winner={characters[resultId]}
-        ranking={previewCharacterId ? previewRanking : sharedResultId ? null : ranking}
+        ranking={resultRanking}
         text={text}
         language={language}
         onRetake={() => resetQuiz("cover", "back")}
         onHome={goHome}
         onShare={shareResult}
-        copied={copied}
+        onGallery={openGallery}
+        restoreGalleryFocus={selectedCharacterId !== null}
+        shareStatus={shareStatus}
+        shared={Boolean(sharedResultId)}
+      />
+    );
+  } else if (screen === "gallery") {
+    screenContent = (
+      <CharacterGallery
+        resultId={resultId}
+        ranking={resultRanking}
+        selectedCharacterId={selectedCharacterId}
+        onSelectCharacter={setSelectedCharacterId}
+        text={text}
+        language={language}
+        onBack={() => navigate("result", "back")}
         shared={Boolean(sharedResultId)}
       />
     );

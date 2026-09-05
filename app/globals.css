@@ -271,79 +271,79 @@ button:disabled {
   top: 50%;
   left: 50%;
   z-index: 10;
-  width: clamp(6rem, 38vw, 9rem);
-  height: clamp(9rem, 62%, 14rem);
+  width: clamp(8.25rem, 43vw, 11.5rem);
+  height: clamp(12rem, 74%, 18rem);
   transform: translate(-50%, -50%);
 }
 
 .cover-art-notebook {
   top: 8%;
-  left: 7%;
-  width: 29%;
-  height: 34%;
+  left: -4%;
+  width: 27%;
+  height: 32%;
   transform: rotate(12deg);
 }
 
 .cover-art-fortune {
-  top: 8%;
-  right: 7%;
+  top: 5%;
+  right: -5%;
   width: 28%;
-  height: 25%;
+  height: 26%;
   transform: rotate(50deg);
 }
 
 .cover-art-green-ticket {
   top: 42%;
-  left: 3%;
-  width: 28%;
-  height: 30%;
+  left: -7%;
+  width: 31%;
+  height: 18%;
   transform: rotate(280deg);
 }
 
 .cover-art-student-id {
-  top: 36%;
-  right: 6%;
-  width: 25%;
+  top: 34%;
+  right: -4%;
+  width: 27%;
   height: 32%;
   transform: rotate(289deg);
 }
 
 .cover-art-receipt {
-  top: 60%;
-  left: 8%;
+  top: 64%;
+  left: -5%;
   width: 26%;
-  height: 34%;
+  height: 31%;
   transform: rotate(26deg);
 }
 
 .cover-art-ticket-stub {
-  top: 17%;
-  right: 7%;
-  width: 27%;
-  height: 20%;
+  top: 16%;
+  right: -7%;
+  width: 31%;
+  height: 22%;
   transform: rotate(-106deg);
 }
 
 .cover-art-boarding-pass {
-  bottom: 9%;
-  left: 13%;
-  width: 25%;
-  height: 27%;
+  bottom: -5%;
+  left: -9%;
+  width: 32%;
+  height: 32%;
   transform: rotate(-49deg);
 }
 
 .cover-art-camera {
-  bottom: 9%;
-  left: 5%;
-  width: 23%;
-  height: 24%;
+  bottom: -10%;
+  left: -4%;
+  width: 32%;
+  height: 29%;
   transform: rotate(-102deg);
 }
 
 .cover-art-passport {
-  right: 8%;
-  bottom: 7%;
-  width: 27%;
+  right: -5%;
+  bottom: -8%;
+  width: 32%;
   height: 38%;
   transform: rotate(-12deg);
 }

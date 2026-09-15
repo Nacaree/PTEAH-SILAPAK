@@ -57,9 +57,16 @@ describe("character gallery", () => {
       expect(panel).toHaveAttribute("aria-labelledby", tabs[index].id);
       expect(within(panel).getByRole("heading", { name: character.name[language] })).toBeInTheDocument();
       expect(within(panel).getByRole("img", { name: character.name[language] })).toHaveAttribute("src", character.image);
-      ["archetype", "summary", "strength", "challenge", "hiddenFear", "traits"].forEach((field) => {
+      ["archetype", "strength", "challenge", "hiddenFear"].forEach((field) => {
         expect(panel).toHaveTextContent(character[field][language]);
       });
+      expect(panel).toHaveTextContent(character.description[language]);
+      expect(panel).toHaveTextContent(character.creativeInstinct.keyword[language]);
+      expect(panel).toHaveTextContent(character.creativeInstinct.description[language]);
+      expect(panel).toHaveTextContent(character.littleContradiction[language]);
+      expect(panel).toHaveTextContent(character.keyToCreativity.keyword[language]);
+      expect(panel).toHaveTextContent(character.keyToCreativity.description[language]);
+      expect(panel).toHaveTextContent(character.summary[language]);
     });
     expect(JSON.parse(window.localStorage.getItem(storageKey))).toEqual({ language, screen: "result", currentIndex: 14, answers });
   });
@@ -74,7 +81,7 @@ describe("character gallery", () => {
 
     const tablist = await openGallery();
     fireEvent.click(within(tablist).getByRole("tab", { name: /Kimly/ }));
-    expect(screen.getByRole("tabpanel")).toHaveTextContent(characters.kimly.traits.en);
+    expect(screen.getByRole("tabpanel")).toHaveTextContent(characters.kimly.description.en);
     expect(window.location.search).toBe("?result=anita");
 
     fireEvent.click(screen.getByRole("button", { name: copy.en.backToResult }));
@@ -185,6 +192,16 @@ describe("character gallery", () => {
     }));
     expect(share.mock.calls[0][0].text).not.toContain("Instagram");
     expect(screen.getByRole("button", { name: copy.en.shared })).toBeInTheDocument();
+  });
+
+  it("includes the Pteah Silapak TikTok link with the other social links", () => {
+    saveResult();
+    render(<Home />);
+
+    expect(screen.getByRole("link", { name: "Follow Pteah Silapak on TikTok" })).toHaveAttribute(
+      "href",
+      "https://www.tiktok.com/@pteahsilapak?_r=1&_t=ZS-99bXwDis7pi",
+    );
   });
 
   it("falls back to a prompt when native sharing and clipboard access are unavailable", async () => {

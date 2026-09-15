@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { SiFacebook, SiInstagram } from "react-icons/si";
+import { SiFacebook, SiInstagram, SiTiktok } from "react-icons/si";
 import { copy, languages } from "./data/content";
 import { characterIds, characters, questions, sections } from "./data/quizData";
 import { getPreviewRanking, getRankedResults, getWinner, isQuizComplete } from "./lib/scoring";
@@ -64,6 +64,8 @@ const pngPreloadSources = [
   "/assets/PS%20ASSEST%20UI-24.png",
   "/assets/Vitou.png",
   "/assets/VitouItemCharacter_essential.png",
+  "/assets/Mascot%20Update%20MC.Vitou-08.png",
+  "/assets/Mascot%20Update%20MC.Vitou-09.png",
   "/assets/keyholes.png",
   "/assets/pslogowhite.png",
   "/assets/pteah-silapak-logo.png",
@@ -119,7 +121,7 @@ const resultBarColors = {
   mc: "#4550a7",
   vitou: "#d99f16",
   tohla: "#c8320d",
-  // Match Kimly's red-orange Traits header for a clear accent on the pink panel.
+  // Match Kimly's red-orange detail header for a clear accent on the pink panel.
   kimly: "#ff582e",
 };
 
@@ -763,25 +765,85 @@ function QuestionScreen({ question, index, section, answer, text, language, onAn
 
 function CharacterDetails({ character, text, language }) {
   const palette = resultPalettes[character.id];
+  const compactFields = ["strength", "challenge", "hiddenFear"];
 
   return (
-    <dl className="mt-3 grid w-full gap-3 text-left">
-      {["strength", "challenge", "hiddenFear", "traits"].map((field) => (
-        <div
-          key={field}
-          className={`${field === "traits" ? "" : "grid grid-cols-[6.5rem_1fr]"} overflow-hidden border-2 border-[#0b210b] shadow-sm`}
-          style={{ backgroundColor: palette.accent, color: palette.accentText }}
-        >
-          <dt
-            className={`flex items-center px-3 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"} ${field === "traits" ? "py-3" : "py-4"}`}
-            style={{ backgroundColor: palette.label, color: palette.labelText }}
+    <>
+      <p className={`mb-5 mt-3 text-center text-base font-bold text-[#1a4c19] ${language === "km" ? "leading-8" : "leading-relaxed"}`}>
+        {localize(character.summary, language)}
+      </p>
+      <dl className="grid w-full gap-3 text-left">
+        {compactFields.map((field) => (
+          <div
+            key={field}
+            className="grid grid-cols-[6.5rem_1fr] overflow-hidden border-2 border-[#0b210b] shadow-sm"
+            style={{ backgroundColor: palette.accent, color: palette.accentText }}
           >
-            {text[field]}
-          </dt>
-          <dd className={`min-w-0 p-4 text-sm font-semibold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>{localize(character[field], language)}</dd>
+            <dt
+              className={`flex items-center px-3 py-4 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"}`}
+              style={{ backgroundColor: palette.label, color: palette.labelText }}
+            >
+              {text[field]}
+            </dt>
+            <dd className={`min-w-0 p-4 text-sm font-semibold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>{localize(character[field], language)}</dd>
+          </div>
+        ))}
+
+        <div
+        className="overflow-hidden border-2 border-[#0b210b] shadow-sm"
+        style={{ backgroundColor: palette.accent, color: palette.accentText }}
+        >
+        <dt className={`px-3 py-3 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"}`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
+          {text.description}
+        </dt>
+        <dd className={`p-4 text-sm font-semibold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>
+          {localize(character.description, language)}
+        </dd>
         </div>
-      ))}
-    </dl>
+
+        <div
+        className="overflow-hidden border-2 border-[#0b210b] shadow-sm"
+        style={{ backgroundColor: palette.accent, color: palette.accentText }}
+        >
+        <dt className={`px-3 py-3 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"}`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
+          {text.creativeInstinct}
+        </dt>
+        <dd className="p-4">
+          <p className={`text-center text-2xl font-black ${language === "km" ? "leading-9" : "leading-tight"}`}>
+            {localize(character.creativeInstinct.keyword, language)}
+          </p>
+          <p className={`mt-3 text-sm font-semibold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>
+            {localize(character.creativeInstinct.description, language)}
+          </p>
+        </dd>
+        </div>
+
+        <div
+        className="overflow-hidden border-2 border-[#0b210b] shadow-sm"
+        style={{ backgroundColor: palette.accent, color: palette.accentText }}
+        >
+        <dt className={`px-3 py-3 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"}`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
+          {text.littleContradiction}
+        </dt>
+        <dd className={`p-4 text-sm font-semibold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>
+          {localize(character.littleContradiction, language)}
+        </dd>
+        </div>
+
+        <div
+        className="overflow-hidden border-2 border-[#0b210b] shadow-sm"
+        style={{ backgroundColor: palette.accent, color: palette.accentText }}
+        >
+        <dt className={`px-3 py-3 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"}`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
+          {text.keyToCreativity}
+        </dt>
+        <dd className={`p-4 text-sm font-semibold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>
+          <span className="font-black">{localize(character.keyToCreativity.keyword, language)}: </span>
+          {localize(character.keyToCreativity.description, language)}
+        </dd>
+        </div>
+      </dl>
+    </>
   );
 }
 
@@ -860,11 +922,10 @@ function CharacterGallery({ resultId, ranking, selectedCharacterId, onSelectChar
             <>
               <h2 className={`text-3xl font-black ${language === "km" ? "leading-relaxed" : "leading-tight"}`}>{localize(character.name, language)}</h2>
               <p className={`mt-2 text-sm font-bold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>{localize(character.archetype, language)}</p>
-              <div className="relative my-6 flex h-64 items-center justify-center">
+              <div className="relative my-6 flex h-[22rem] items-center justify-center">
                 <span className="absolute h-52 w-44 rotate-[-8deg] rounded-[48%_52%_46%_54%] opacity-25" style={{ backgroundColor: palette.accent }} aria-hidden="true" />
-                {character.image ? <img src={character.image} alt={localize(character.name, language)} decoding="async" className="relative h-full max-w-full object-contain" /> : <span className="relative text-8xl">{character.mark}</span>}
+                {character.image ? <img src={character.image} alt={localize(character.name, language)} decoding="async" className="relative h-[100%] w-auto max-w-[92%] object-contain" /> : <span className="relative text-8xl">{character.mark}</span>}
               </div>
-              <p className={`mb-7 text-lg font-bold ${language === "km" ? "leading-8" : "leading-relaxed"}`}>{localize(character.summary, language)}</p>
               <CharacterDetails character={character} text={text} language={language} />
             </>
           )}
@@ -907,7 +968,7 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
       language={language}
     >
       <div className="flex flex-col items-center px-6 pb-10 pt-8 text-center text-[#1a4c19]">
-        <p className="text-[10px] font-black uppercase tracking-[0.25em] opacity-55">{text.resultEyebrow}</p>
+        <p className="text-[10px] font-black upperlinecase tracking-[0.25em] opacity-55">{text.resultEyebrow}</p>
         <h1 className={`${language === "km" ? "text-4xl leading-relaxed" : "text-5xl"} mt-2 font-black tracking-tight`} style={{ color: resultTheme.accent }}>{localize(winner.name, language)}</h1>
         <p className={`${language === "km" ? "leading-7" : "uppercase tracking-[0.12em]"} mt-1 text-sm font-black opacity-80`}>{localize(winner.archetype, language)}</p>
         {topMatch && (
@@ -920,7 +981,7 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
         )}
 
         <div
-          className="relative my-7 flex h-[26rem] w-full items-center justify-center"
+          className="relative my-7 flex h-[38rem] w-full items-center justify-center overflow-hidden"
           style={{ color: resultTheme.accent }}
           aria-label={`${localize(winner.name, language)} portrait`}
         >
@@ -935,14 +996,12 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
               alt={localize(winner.name, language)}
               loading="eager"
               decoding="async"
-              className={`relative z-10 h-full w-auto max-w-[92%] object-contain ${winner.id === "tohla" ? "scale-[1.2]" : "scale-[1.25]"}`}
+              className="relative z-10 h-[100%] w-auto max-w-[92%] scale-[1.2] object-contain"
             />
           ) : (
             <span className="text-8xl font-black">{winner.mark}</span>
           )}
         </div>
-
-        <p className={`${language === "km" ? "leading-9" : "leading-tight"} max-w-sm text-xl font-black text-[#1a4c19]`}>{localize(winner.summary, language)}</p>
 
         {runnerUp && (
           <div
@@ -1034,6 +1093,7 @@ function getSection(index) {
 const socialLinks = {
   instagram: "https://www.instagram.com/pteahsilapak?igsi=MTdsYWQydGY3Z3hxbQ==",
   facebook: "https://www.facebook.com/share/19bXDDxrB1/?mibextid=wwXIfr",
+  tiktok: "https://www.tiktok.com/@pteahsilapak?_r=1&_t=ZS-99bXwDis7pi",
 };
 
 function SocialLinks({ text }) {
@@ -1058,6 +1118,15 @@ function SocialLinks({ text }) {
           className="grid h-16 w-16 place-items-center rounded-2xl bg-[#1877f2] shadow-md transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a4c19]"
         >
           <SiFacebook className="h-10 w-10 text-white" aria-hidden="true" />
+        </a>
+        <a
+          href={socialLinks.tiktok}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Follow Pteah Silapak on TikTok"
+          className="grid h-16 w-16 place-items-center rounded-2xl bg-black shadow-md transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1a4c19]"
+        >
+          <SiTiktok className="h-10 w-10 text-white" aria-hidden="true" />
         </a>
       </div>
     </section>

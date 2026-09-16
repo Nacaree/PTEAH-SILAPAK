@@ -96,6 +96,15 @@ describe("character gallery", () => {
     expect(screen.getByRole("tab", { selected: true })).toHaveTextContent("Anita");
   });
 
+  it("opens a Khmer developer preview from the URL", async () => {
+    window.history.replaceState({}, "", "/?preview=mc&lang=km");
+    render(<Home />);
+
+    expect(await screen.findByRole("heading", { level: 1, name: "MC" })).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute("lang", "km");
+    expect(screen.getByText(copy.km.resultEyebrow)).toBeInTheDocument();
+  });
+
   it("lets shared-link visitors browse without exposing scores from a saved quiz", async () => {
     saveResult();
     const saved = window.localStorage.getItem(storageKey);

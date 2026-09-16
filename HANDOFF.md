@@ -32,6 +32,12 @@ http://localhost:5173/?preview=vitou
 http://localhost:5173/?preview=mc
 ```
 
+Add `lang=km` to preview a result directly in Khmer:
+
+```text
+http://localhost:5173/?preview=mc&lang=km
+```
+
 Force a specific runner-up with `runnerup`:
 
 ```text

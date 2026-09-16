@@ -362,7 +362,7 @@ function BottomNav({ onHome, text }) {
   );
 }
 
-function PrimaryButton({ children, onClick, disabled = false, light = false }) {
+function PrimaryButton({ children, onClick, disabled = false, light = false, className = "" }) {
   return (
     <button
       type="button"
@@ -372,7 +372,7 @@ function PrimaryButton({ children, onClick, disabled = false, light = false }) {
         light
           ? "bg-white text-[var(--theme)] hover:bg-white/90 focus-visible:outline-white"
           : "bg-[var(--theme)] text-[var(--contrast)] shadow-[0_8px_20px_rgba(26,76,25,0.18)] hover:-translate-y-0.5 hover:brightness-105 focus-visible:outline-[var(--theme)]"
-      }`}
+      } ${className}`}
     >
       {children}
     </button>
@@ -391,7 +391,7 @@ function Landing({ onLanguage, notice, hasProgress, onResume, onReset, text, lan
               key={id}
               type="button"
               onClick={() => onLanguage(id)}
-              className={`grid min-h-12 w-[6.75rem] place-items-center px-4 text-2xl font-black tracking-[0.06em] text-white transition hover:brightness-95 focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white ${id === "km" ? "bg-[#b5d627]" : "bg-[#66883e]"}`}
+              className={`grid min-h-12 w-[6.75rem] place-items-center px-4 text-2xl font-black text-white transition hover:brightness-95 focus-visible:relative focus-visible:z-10 focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-white ${id === "km" ? "bg-[#b5d627]" : "bg-[#66883e]"} ${id === "en" ? "tracking-[0.06em]" : ""}`}
             >
               <span className="translate-x-[-1px] translate-y-0.5">
                 {languages[id].label}
@@ -780,7 +780,7 @@ function CharacterDetails({ character, text, language }) {
             style={{ backgroundColor: palette.accent, color: palette.accentText }}
           >
             <dt
-              className={`flex items-center px-3 py-4 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"}`}
+              className={`flex items-center px-3 py-4 ${language === "km" ? "text-[14px] leading-5" : "text-[10px] uppercase tracking-[0.12em]"} font-black`}
               style={{ backgroundColor: palette.label, color: palette.labelText }}
             >
               {text[field]}
@@ -793,7 +793,7 @@ function CharacterDetails({ character, text, language }) {
         className="overflow-hidden border-2 border-[#0b210b] shadow-sm"
         style={{ backgroundColor: palette.accent, color: palette.accentText }}
         >
-        <dt className={`px-3 py-3 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"}`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
+        <dt className={`px-3 py-3 ${language === "km" ? "text-[14px] leading-5" : "text-[10px] uppercase tracking-[0.12em]"} font-black`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
           {text.description}
         </dt>
         <dd className={`p-4 text-sm font-semibold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>
@@ -805,7 +805,7 @@ function CharacterDetails({ character, text, language }) {
         className="overflow-hidden border-2 border-[#0b210b] shadow-sm"
         style={{ backgroundColor: palette.accent, color: palette.accentText }}
         >
-        <dt className={`px-3 py-3 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"}`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
+        <dt className={`px-3 py-3 ${language === "km" ? "text-[14px] leading-5" : "text-[10px] uppercase tracking-[0.12em]"} font-black`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
           {text.creativeInstinct}
         </dt>
         <dd className="p-4">
@@ -822,7 +822,7 @@ function CharacterDetails({ character, text, language }) {
         className="overflow-hidden border-2 border-[#0b210b] shadow-sm"
         style={{ backgroundColor: palette.accent, color: palette.accentText }}
         >
-        <dt className={`px-3 py-3 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"}`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
+        <dt className={`px-3 py-3 ${language === "km" ? "text-[14px] leading-5" : "text-[10px] uppercase tracking-[0.12em]"} font-black`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
           {text.littleContradiction}
         </dt>
         <dd className={`p-4 text-sm font-semibold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>
@@ -834,7 +834,7 @@ function CharacterDetails({ character, text, language }) {
         className="overflow-hidden border-2 border-[#0b210b] shadow-sm"
         style={{ backgroundColor: palette.accent, color: palette.accentText }}
         >
-        <dt className={`px-3 py-3 text-[10px] font-black ${language === "km" ? "leading-5" : "uppercase tracking-[0.12em]"}`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
+        <dt className={`px-3 py-3 ${language === "km" ? "text-[14px] leading-5" : "text-[10px] uppercase tracking-[0.12em]"} font-black`} style={{ backgroundColor: palette.label, color: palette.labelText }}>
           {text.keyToCreativity}
         </dt>
         <dd className={`p-4 text-sm font-semibold ${language === "km" ? "leading-7" : "leading-relaxed"}`}>
@@ -968,7 +968,11 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
       language={language}
     >
       <div className="flex flex-col items-center px-6 pb-10 pt-8 text-center text-[#1a4c19]">
-        <p className="text-[10px] font-black upperlinecase tracking-[0.25em] opacity-55">{text.resultEyebrow}</p>
+        <p className={`font-black ${
+  language === "km"
+    ? "text-lg leading-8"
+    : "text-sm uppercase tracking-[0.25em]"
+} opacity-55`}>{text.resultEyebrow}</p>
         <h1 className={`${language === "km" ? "text-4xl leading-relaxed" : "text-5xl"} mt-2 font-black tracking-tight`} style={{ color: resultTheme.accent }}>{localize(winner.name, language)}</h1>
         <p className={`${language === "km" ? "leading-7" : "uppercase tracking-[0.12em]"} mt-1 text-sm font-black opacity-80`}>{localize(winner.archetype, language)}</p>
         {topMatch && (
@@ -1024,9 +1028,9 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
               ) : runnerUp.mark}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] opacity-65">{text.secondMatch}</p>
-              <p className="mt-1 text-lg font-black">{localize(runnerUp.name, language)}</p>
-              <p className={`${language === "km" ? "leading-5" : ""} text-xs font-bold opacity-70`}>{localize(runnerUp.archetype, language)}</p>
+              <p className={`font-black opacity-65 ${language === "km" ? "text-[14px] leading-8" : "text-[9px] uppercase tracking-[0.2em]"}`}>{text.secondMatch}</p>
+              <p className="text-lg font-black">{localize(runnerUp.name, language)}</p>
+              <p className={`${language === "km" ? "text-sm leading-7" : "text-xs"} font-bold opacity-70`}>{localize(runnerUp.archetype, language)}</p>
             </div>
             <span className="text-lg font-black">
               {secondMatch.percentage.toFixed(1)}%
@@ -1034,7 +1038,7 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
           </div>
         )}
 
-        <h2 className="mt-8 w-full text-left text-sm font-black uppercase tracking-[0.14em] text-[#1a4c19]">{text.moreInfo}</h2>
+        <h2 className={`mt-8 w-full text-left font-black text-[#1a4c19] ${language === "km" ? "text-base leading-7" : "text-sm uppercase tracking-[0.14em]"}`}>{text.moreInfo}</h2>
         <CharacterDetails character={winner} text={text} language={language} />
 
         {ranking && !shared && (
@@ -1042,7 +1046,7 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
             className="mt-8 w-full rounded-none border-[3px] border-[#1a1a1a] p-5 text-left shadow-sm"
             style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}
           >
-            <h2 className="text-base font-black uppercase tracking-[0.16em]">{text.fullBreakdown}</h2>
+            <h2 className={`text-base font-black ${language === "km" ? "leading-7" : "uppercase tracking-[0.16em]"}`}>{text.fullBreakdown}</h2>
             <div className="mt-4 grid gap-3">
               {ranking.map((match) => (
                 <div key={match.characterId} className="grid grid-cols-[18px_62px_1fr_48px] items-center gap-2 text-sm font-bold">
@@ -1066,7 +1070,7 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
         )}
 
         {shared && (
-          <p className="mt-7 rounded-full px-5 py-2 text-xs font-bold shadow-sm" style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>{text.sharedResult}</p>
+          <p className={`mt-7 rounded-full text-center font-bold shadow-sm ${language === "km" ? "w-full max-w-sm px-6 py-3 text-sm leading-7" : "px-5 py-2 text-xs"}`} style={{ backgroundColor: resultTheme.accent, color: resultAccentText }}>{text.sharedResult}</p>
         )}
 
         <button ref={galleryButtonRef} type="button" onClick={onGallery} className="mt-8 min-h-14 w-full rounded-full bg-[#1a4c19] px-6 py-4 text-sm font-black text-white shadow-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1a4c19]">
@@ -1074,7 +1078,7 @@ function ResultScreen({ winner, ranking, text, language, onRetake, onHome, onSha
         </button>
 
         <div className="mt-4 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
-          <PrimaryButton onClick={onShare}>{shareStatus === "shared" ? text.shared : shareStatus === "copied" ? text.copied : text.share}</PrimaryButton>
+          <PrimaryButton onClick={onShare} className={language === "km" ? "whitespace-nowrap px-4" : ""}>{shareStatus === "shared" ? text.shared : shareStatus === "copied" ? text.copied : text.share}</PrimaryButton>
           <button type="button" onClick={onRetake} className="min-h-12 rounded-full border-2 border-[#1a4c19]/25 bg-white px-5 text-sm font-black text-[#1a4c19] transition hover:border-[#1a4c19]/50">
             {text.retake}
           </button>
@@ -1170,10 +1174,12 @@ export default function Home() {
     if (import.meta.env.DEV) {
       const previewId = params.get("preview");
       if (previewId && characters[previewId]) {
+        const previewLanguage = params.get("lang") || params.get("language");
         const requestedRunnerUpId = params.get("runnerup") || params.get("runnerUp");
         const runnerUpId = requestedRunnerUpId && requestedRunnerUpId !== previewId && characters[requestedRunnerUpId]
           ? requestedRunnerUpId
           : null;
+        if (previewLanguage && languages[previewLanguage]?.available) setLanguage(previewLanguage);
         setPreviewCharacterId(previewId);
         setPreviewRunnerUpId(runnerUpId);
         setScreen("result");

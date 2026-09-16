@@ -7,7 +7,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/Ps%20fonts/Poppins-Regular.ttf") format("truetype");
+  src: url("/PS%20Fonts/Poppins-Regular.ttf") format("truetype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -15,7 +15,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/Ps%20fonts/Poppins-SemiBold.ttf") format("truetype");
+  src: url("/PS%20Fonts/Poppins-SemiBold.ttf") format("truetype");
   font-style: normal;
   font-weight: 600;
   font-display: swap;
@@ -23,7 +23,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/Ps%20fonts/Poppins-Bold.ttf") format("truetype");
+  src: url("/PS%20Fonts/Poppins-Bold.ttf") format("truetype");
   font-style: normal;
   font-weight: 700;
   font-display: swap;
@@ -31,7 +31,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/Ps%20fonts/Poppins-ExtraBold.ttf") format("truetype");
+  src: url("/PS%20Fonts/Poppins-ExtraBold.ttf") format("truetype");
   font-style: normal;
   font-weight: 800;
   font-display: swap;
@@ -39,7 +39,7 @@
 
 @font-face {
   font-family: "Poppins";
-  src: url("/Ps%20fonts/Poppins-Black.ttf") format("truetype");
+  src: url("/PS%20Fonts/Poppins-Black.ttf") format("truetype");
   font-style: normal;
   font-weight: 900;
   font-display: swap;
@@ -47,7 +47,7 @@
 
 @font-face {
   font-family: "Kantumruy";
-  src: url("/Ps%20fonts/KantumruyPro-VariableFont_wght.ttf") format("truetype");
+  src: url("/PS%20Fonts/KantumruyPro-VariableFont_wght.ttf") format("truetype");
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
@@ -55,7 +55,7 @@
 
 @font-face {
   font-family: "MiSans Khmer";
-  src: url("/Ps%20fonts/MiSansKhmer-Normal.otf") format("opentype");
+  src: url("/PS%20Fonts/MiSansKhmer-Normal.otf") format("opentype");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -98,7 +98,8 @@ legend {
 .font-khmer h1,
 .font-khmer h2,
 .font-khmer h3,
-.font-khmer legend {
+.font-khmer legend,
+.font-khmer dt {
   font-family: "Kantumruy", "MiSans Khmer", Arial, sans-serif;
 }
 
